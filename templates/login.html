@@ -5,21 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🔒 Acceso Privado</title>
     <style>
-        /* COLORES POR DEFECTO (MODO CLARO) */
+        /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
         :root {
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-label: #475569;
             --bg-input: #ffffff;
             --border-input: #cbd5e1;
             --text-input: #0f172a;
             --btn-color: #0b4bc4;
             --btn-hover: #1d4ed8;
-            --border-card: rgba(0, 0, 0, 0.05);
+            --border-card: #cbd5e1;
+            --error-bg: #fee2e2;
+            --error-text: #991b1b;
         }
 
-        /* COLORES SI EL IPHONE ESTÁ EN MODO OSCURO */
+        /* 🌙 TRADUCCIÓN AUTOMÁTICA SI EL TELÉFONO ESTÁ EN MODO OSCURO */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-body: #121212;
@@ -32,6 +34,8 @@
                 --btn-color: #0b4bc4;
                 --btn-hover: #1d4ed8;
                 --border-card: #2d2d2d;
+                --error-bg: #7f1d1d;
+                --error-text: #fca5a5;
             }
         }
 
@@ -45,21 +49,23 @@
             align-items: center;
             min-height: 100vh;
             padding: 16px;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s, color 0.2s;
         }
+        
         .login-card {
             background-color: var(--bg-card);
             padding: 32px 24px;
             border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             width: 100%;
             max-width: 340px;
             text-align: center;
             border: 1px solid var(--border-card);
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.2s, border-color 0.2s;
         }
+        
         h2 { 
-            color: var(--text-main); 
+            color: var(--text-main);
             margin-bottom: 28px; 
             font-size: 24px; 
             display: flex; 
@@ -68,10 +74,12 @@
             gap: 10px;
             font-weight: 600;
         }
+        
         .form-group { 
             margin-bottom: 20px; 
             text-align: left; 
         }
+        
         label { 
             display: block; 
             margin-bottom: 8px; 
@@ -79,6 +87,7 @@
             color: var(--text-label); 
             font-weight: 500;
         }
+        
         input {
             width: 100%;
             padding: 14px;
@@ -88,14 +97,18 @@
             font-size: 16px;
             color: var(--text-input);
             box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
+        
         input::placeholder {
-            color: #888888;
+            color: #94a3b8;
         }
+        
         input:focus { 
             outline: none;
             border-color: var(--btn-hover); 
         }
+        
         button {
             width: 100%;
             padding: 14px;
@@ -109,15 +122,17 @@
             margin-top: 10px;
             transition: background-color 0.2s;
         }
+        
         button:hover { 
             background-color: var(--btn-hover); 
         }
+        
         .error { 
-            color: #fca5a5; 
+            color: var(--error-text); 
             font-size: 14px; 
             margin-bottom: 16px; 
             font-weight: 500; 
-            background-color: #7f1d1d; 
+            background-color: var(--error-bg); 
             padding: 10px; 
             border-radius: 6px; 
             text-align: center;
