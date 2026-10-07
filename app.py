@@ -153,10 +153,10 @@ def index():
         db.session.add(nuevo_registro)
         db.session.commit()
         return redirect(url_for('index'))
+        fecha_hoy = datetime.utcnow().strftime('%Y-%m-%d')
+        historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+        return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
     
-    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
-
 # RUTA: ELIMINAR REGISTROS PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
@@ -178,9 +178,3 @@ with app.app_context():
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
-
- # Buscamos la fecha de hoy en formato internacional para el navegador
-    fecha_hoy = datetime.utcnow().strftime('%Y-%m-%d')
-    
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
-
