@@ -13,8 +13,8 @@ app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONEXIÓN DIRECTA NATIVA A SUPABASE (Evita por completo las validaciones ocultas de Railway)
-DATABASE_URL = 'postgresql://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@://supabase.com'
+# CONEXIÓN DIRECTA NATIVA A SUPABASE (Dirección oficial directa sin pooler para psycopg2)
+DATABASE_URL = 'postgresql://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@db.eczhbmjltaropyzagdww.supabase.co:5432/postgres'
 
 def get_db_connection():
     # Conexión pura que no valida variables de entorno ocultas
