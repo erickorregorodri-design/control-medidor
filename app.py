@@ -9,22 +9,22 @@ app = Flask(__name__)
 # LLAVE SECRETA: Necesaria para activar las sesiones seguras en Flask
 app.secret_key = 'mi_llave_secreta_super_segura_medidores'
 
-# Credenciales fijas de acceso (Puedes cambiarlas aquí a tu gusto)
+# Credenciales fijas de acceso
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC usa SQLite / Internet usa Supabase Directo)
+# CONFIGURACIÓN DIRECTA CRUDA (Para evitar que SQLAlchemy valide variables ocultas vacías)
+# Ponemos la clave web con el carácter '+' convertido a '%2B' de forma explícita
+URI_SUPABASE = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
+
 if os.environ.get('RENDER') or os.environ.get('RAILWAY_STATIC_URL') or os.environ.get('PORT'):
-    # Conector estándar psycopg2 apuntando de forma fija al puerto directo 5432 para Railway
-    # El signo más '+' está protegido con su formato seguro '%2B'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
+    app.config['SQLALCHEMY_DATABASE_URI'] = URI_SUPABASE
 else:
-    # Tu configuración de PC local que te corre excelente
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# INICIALIZACIÓN FORZADA CONTROLADA
+# INICIALIZACIÓN DIRECTA (Ignora las variables automáticas de Railway)
 db = SQLAlchemy()
 db.init_app(app)
 
@@ -79,7 +79,7 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # BUSCAR LA LECTURA INMEDIATAMENTE ANTERIOR EN LA HISTORIA
+        # BUSCAR LA LECTURA ANTERIOR REAL
         ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
                                               .order_by(RegistroMedidor.fecha.desc())\
                                               .first()
