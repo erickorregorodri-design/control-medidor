@@ -116,13 +116,15 @@ def index():
             if fecha_objeto <= ultimo_registro.fecha:
                 error_validacion = f"⚠️ Error: La fecha seleccionada ({fecha_objeto.strftime('%d/%m/%Y')}) debe ser posterior a la del último registro guardado ({ultimo_registro.fecha.strftime('%d/%m/%Y')})."
                 historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
+                fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
                 
             # 2. Validación de Lecturas
             if lectura_actual_p1 < ultimo_registro.lectura_p1 or lectura_actual_p2 < ultimo_registro.lectura_p2:
                 error_validacion = f"⚠️ Error: Las lecturas ingresadas no pueden ser menores al último registro guardado (Erick: {ultimo_registro.lectura_p1} kWh / Esteban: {ultimo_registro.lectura_p2} kWh)."
                 historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
+                fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
         cons_p1, cons_p2 = 0.0, 0.0
         pct_p1, pct_p2 = 0.0, 0.0
@@ -152,9 +154,12 @@ def index():
         )
         db.session.add(nuevo_registro)
         db.session.commit()
-        fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-        historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-        return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
+        return redirect(url_for('index'))
+    
+    # RESPUESTA GENERAL OBLIGATORIA (Fuera del POST)
+    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
     
 # RUTA: ELIMINAR REGISTROS PROTEGIDA
