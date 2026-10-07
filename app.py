@@ -4,9 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 # CONFIGURACIÓN DE CARPETA SEGURA PARA EL DISCO DURO (VOLUMEN)
-# Obligamos a Python a verificar y crear la ruta del disco duro antes de arrancar la app
 DATABASE_DIR = '/app/data'
-if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):  # Si está en internet
+if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):  # Si está en internet (Railway)
     if not os.path.exists(DATABASE_DIR):
         os.makedirs(DATABASE_DIR, exist_ok=True)
     DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores.db')
@@ -69,6 +68,11 @@ def index():
     if not session.get('logeado'):
         return redirect(url_for('login'))
         
+    error_validacion = None
+    
+    # Obtener el último registro base antes de cualquier acción
+    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
+        
     if request.method == 'POST':
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
@@ -78,15 +82,22 @@ def index():
         fecha_str = request.form.get('fecha_lectura')
         fecha_objeto = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else datetime.utcnow().date()
 
+        # VALIDACIÓN CRÍTICA EN EL SERVIDOR:
+        # Si ya existen registros, las nuevas lecturas no pueden ser menores a las anteriores
+        if ultimo_registro:
+            if lectura_actual_p1 < ultimo_registro.lectura_p1 or lectura_actual_p2 < ultimo_registro.lectura_p2:
+                error_validacion = f"⚠️ Error: Las lecturas ingresadas no pueden ser menores al último registro guardado (Erick: {ultimo_registro.lectura_p1} kWh / Esteban: {ultimo_registro.lectura_p2} kWh)."
+                historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+
         cons_p1, cons_p2 = 0.0, 0.0
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # Buscar la lectura inmediatamente anterior en la base de datos
-        with app.app_context():
-            ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
-                                                  .order_by(RegistroMedidor.fecha.desc())\
-                                                  .first()
+        # Buscar la lectura inmediatamente anterior para el cálculo
+        ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
+                                              .order_by(RegistroMedidor.fecha.desc())\
+                                              .first()
         
         if ultima_lectura:
             cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura.lectura_p1)
@@ -110,8 +121,7 @@ def index():
         return redirect(url_for('index'))
     
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro)
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
 
 # RUTA: ELIMINAR REGISTROS PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
