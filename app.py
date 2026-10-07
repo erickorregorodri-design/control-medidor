@@ -1,26 +1,30 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy.engine import URL
 
-# Instanciamos la aplicación de Flask de forma limpia
 app = Flask(__name__)
 
-# CONFIGURACIÓN INTELIGENTE CON GELADA (PC usa SQLite / Internet usa Supabase de forma directa)
-if os.environ.get('RENDER'):
-    # Usamos la URI directa. Reemplazamos los caracteres conflictivos para cumplir las reglas de SQLAlchemy
-    # Cambiamos el signo más '+' de tu clave por '%2B' para que no rompa la lectura del puerto
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
-else:
-    # Tu configuración local de PC que te corre excelente
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
+# LLAVE SECRETA: Necesaria para activar las sesiones seguras en Flask
+app.secret_key = 'mi_llave_secreta_super_segura_medidores'
 
+# Credenciales fijas de acceso (Puedes cambiarlas aquí a tu gusto)
+USUARIO_CORRECTO = "admin"
+CLAVE_CORRECTA = "medidor2026"
+
+# CONFIGURACIÓN DE BASE DE DATOS
+connection_url = URL.create(
+    drivername="postgresql+pg8000",
+    username=os.environ.get('DB_USER', 'postgres.eczhbmjltaropyzagdww'),
+    password=os.environ.get('DB_PASSWORD', 'kx?EQ-65D+vcqYV'),
+    host=os.environ.get('DB_HOST', '://supabase.com'),
+    port=int(os.environ.get('DB_PORT', 6543)),
+    database="postgres"
+)
+app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# INICIALIZACIÓN FORZADA CONTROLADA
-# Forzamos a SQLAlchemy a usar estrictamente la URI que definimos arriba, ignorando cualquier variable oculta de Render
-db = SQLAlchemy()
-db.init_app(app)
+db = SQLAlchemy(app)
 
 # Modelo SQL
 class RegistroMedidor(db.Model):
@@ -36,8 +40,31 @@ class RegistroMedidor(db.Model):
     pago_p1 = db.Column(db.Float, default=0.0)
     pago_p2 = db.Column(db.Float, default=0.0)
 
+# RUTA DEL LOGIN
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] == USUARIO_CORRECTO and request.form['password'] == CLAVE_CORRECTA:
+            session['logeado'] = True
+            return redirect(url_for('index'))
+        else:
+            error = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.'
+    return render_template('login.html', error=error)
+
+# RUTA PARA CERRAR SESIÓN
+@app.route('/logout')
+def logout():
+    session.pop('logeado', None)
+    return redirect(url_for('login'))
+
+# RUTA PRINCIPAL PROTEGIDA
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # Si no ha iniciado sesión, lo mandamos al login obligatoriamente
+    if not session.get('logeado'):
+        return redirect(url_for('login'))
+        
     if request.method == 'POST':
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
@@ -51,7 +78,6 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # BUSCAR LA LECTURA INMEDIATAMENTE ANTERIOR EN LA HISTORIA
         ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
                                               .order_by(RegistroMedidor.fecha.desc())\
                                               .first()
@@ -79,12 +105,13 @@ def index():
     
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
-    
     return render_template('index.html', historial=historial, ultimo=ultimo_registro)
 
-# RUTA PARA ELIMINAR REGISTROS
+# RUTA ELIMINAR PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
+    if not session.get('logeado'):
+        return redirect(url_for('login'))
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
