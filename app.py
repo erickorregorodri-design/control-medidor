@@ -18,13 +18,13 @@ app = Flask(__name__)
 # LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
 app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 
-# CONTROL DE TIEMPO: Cierre automático a los 5 minutos de inactividad
+# CONTROL DE TIEMPO: Cierre automático a los 1 minutos de inactividad
 from datetime import timedelta
 
 @app.before_request
 def controlar_tiempo_sesion():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5) # Ajustado a 5 minutos estándar
+    app.permanent_session_lifetime = timedelta(minutes=1) # Ajustado a 1 minutos estándar
     if 'logeado' in session:
         session.modified = True
 
@@ -48,7 +48,7 @@ db.init_app(app)
 class RegistroMedidor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Date, default=datetime.utcnow)
-    lectura_p1 = db.Column(db.Float, nullable=False)
+    lectura_p1 = db.Column(db.Float, nullable=False)1
     lectura_p2 = db.Column(db.Float, nullable=False)
     monto_boleta = db.Column(db.Float, nullable=True)
     consumo_p1 = db.Column(db.Float, default=0.0)
