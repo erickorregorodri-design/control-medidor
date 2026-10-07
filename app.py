@@ -2,22 +2,18 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy.engine import URL
 
 app = Flask(__name__)
 
-# CONFIGURACIÓN DEFINITIVA Y DIRECTA
-# Tomamos las variables limpias que pusiste en Render y armamos la conexión
-connection_url = URL.create(
-    drivername="postgresql+pg8000",
-    username=os.environ.get('DB_USER', 'postgres.eczhbmjltaropyzagdww'),
-    password=os.environ.get('DB_PASSWORD', 'kx?EQ-65D+vcqYV'),
-    host=os.environ.get('DB_HOST', '://supabase.com'),
-    port=int(os.environ.get('DB_PORT', 6543)),
-    database="postgres"
-)
+# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC local usa SQLite / Internet usa Psycopg2)
+if os.environ.get('RENDER'):
+    # Cadena directa y robusta con el conector estándar de la industria (+psycopg2)
+    # Apuntamos directo al Session Pooler que es compatible con IPv4 en la nube
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@://supabase.com'
+else:
+    # Tu configuración de PC local que te funciona perfecto y libre de bloqueos de Windows
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
