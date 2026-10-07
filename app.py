@@ -5,12 +5,12 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configuración inteligente de Base de Datos (Render usa Supabase / PC local usa SQLite)
+# Configuración Inteligente y Segura de Base de Datos
 if os.environ.get('RENDER'):
-    # Cadena de texto directa usando el Session Pooler (Puerto 6543) compatible con IPv4 en la nube
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+pg8000://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@://supabase.com'
+    # En internet leerá la URL directamente desde el panel seguro de Render
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 else:
-    # Tu configuración local de PC que ya te funciona perfecto
+    # Tu configuración local de PC que te corre excelente
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
