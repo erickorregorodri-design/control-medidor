@@ -123,14 +123,15 @@
 <script>
     document.getElementById('fecha_lectura').valueAsDate = new Date();
 
-    // Capturamos el último registro real de la tabla de forma segura usando Jinja
-    const ult_p1 = parseFloat("{% if historial %}{{ historial[0].lectura_p1 }}{% else %}0{% endif %}");
-    const ult_p2 = parseFloat("{% if historial %}{{ historial[0].lectura_p2 }}{% else %}0{% endif %}");
+    // Leemos de forma segura el último registro individual enviado desde Flask
+    const ult_p1 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %}");
+    const ult_p2 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %}");
 
     function calcularEnPantalla() {
         const inputP1 = parseFloat(document.getElementById('valor_p1').value) || 0;
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
+
 
         if(inputP1 <= 0 || inputP2 <= 0) {
             alert("Ingresa valores válidos.");
