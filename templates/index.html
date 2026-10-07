@@ -3,81 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Medidor Eléctrico</title>
+    <title>⚡ Control de Medidor</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --success: #16a34a;
-            --background: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --border: #cbd5e1;
-        }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --background: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #cbd5e1; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--background);
-            color: var(--text);
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-        .container { max-width: 650px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--background); color: var(--text); padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { max-width: 750px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
         .card { background: var(--card); padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); width: 100%; }
         h2 { margin-bottom: 20px; color: #0f172a; text-align: center; font-size: 24px; }
         .form-group { margin-bottom: 18px; width: 100%; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #475569; }
-        input[type="number"], input[type="date"] {
-            width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; background-color: #fff; color: var(--text);
-        }
-        input:focus { outline: 2px solid var(--primary); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
-        @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; gap: 0; } }
+        input[type="number"], input[type="date"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
-        
-        /* Estilos de Botones */
-        .btn-group { display: flex; gap: 12px; margin-top: 10px; }
-        button {
-            flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s;
-        }
+        .btn-group { display: flex; gap: 12px; }
+        button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
         .btn-calc { background-color: var(--primary); color: white; }
-        .btn-calc:hover { background-color: #1d4ed8; }
         .btn-save { background-color: var(--success); color: white; }
-        .btn-save:hover { background-color: #15803d; }
-        
-        /* Panel de Previsualización */
-        .preview-box {
-            background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid var(--primary); display: none;
-        }
-        .preview-box h3 { font-size: 16px; margin-bottom: 10px; color: #334155; }
+        .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; }
+        .btn-delete:hover { background-color: var(--danger); color: white; }
+        .preview-box { background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid var(--primary); display: none; }
         .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
-
-        /* Estilos de la Tabla */
         .table-responsive { overflow-x: auto; width: 100%; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: 600; }
-        tr:hover { background-color: #f8fafc; }
-        .badge {
-            padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: #e0f2fe; color: #0369a1; display: inline-block; margin-right: 4px;
-        }
+        th { background-color: #f1f5f9; color: #475569; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: #e0f2fe; color: #0369a1; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Formulario de ingreso -->
     <div class="card">
         <h2>⚡ Registro de Medidor</h2>
         <form action="/" method="POST" id="medidorForm">
-            
             <div class="form-group">
                 <label for="fecha_lectura">Fecha de la Lectura</label>
                 <input type="date" id="fecha_lectura" name="fecha_lectura" required>
             </div>
-
             <div class="grid-2">
                 <div class="form-group">
                     <label for="valor_p1">Lectura Erick (kWh)</label>
@@ -88,32 +51,26 @@
                     <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00">
                 </div>
             </div>
-
             <hr>
-
             <div class="form-group">
                 <label for="monto_boleta">Monto Total de la Boleta ($)</label>
                 <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000">
             </div>
 
-            <!-- Recuadro dinámico de Previsualización de Cálculos -->
             <div class="preview-box" id="previewBox">
-                <h3>🔍 Previsualización de Resultados (No Guardado)</h3>
+                <h3>🔍 Previsualización Neto Real</h3>
                 <div class="preview-grid">
-                    <div><strong>Consumo P1:</strong> <span id="p_cons1">0</span> kWh</div>
-                    <div><strong>Consumo P2:</strong> <span id="p_cons2">0</span> kWh</div>
-                    <div><strong>Porcentaje P1:</strong> <span id="p_pct1">0</span>%</div>
-                    <div><strong>Porcentaje P2:</strong> <span id="p_pct2">0</span>%</div>
-                    <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed #cbd5e1; padding-top: 5px;">
+                    <div><strong>Consumo Erick:</strong> <span id="p_cons1">0</span> kWh</div>
+                    <div><strong>Consumo Esteban:</strong> <span id="p_cons2">0</span> kWh</div>
+                    <div><strong>Porcentaje Erick:</strong> <span id="p_pct1">0</span>%</div>
+                    <div><strong>Porcentaje Esteban:</strong> <span id="p_pct2">0</span>%</div>
+                    <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed #border; padding-top: 5px;">
                         <strong>A Pagar Erick:</strong> $<span id="p_pago1">0</span>
                     </div>
-                    <div style="grid-column: span 2;">
-                        <strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span>
-                    </div>
+                    <div><strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span></div>
                 </div>
             </div>
 
-            <!-- Botones separados -->
             <div class="btn-group">
                 <button type="button" class="btn-calc" onclick="calcularEnPantalla()">1. Calcular</button>
                 <button type="submit" class="btn-save" id="btnGuardar" disabled style="opacity: 0.5; cursor: not-allowed;">2. Guardar en Base de Datos</button>
@@ -121,7 +78,6 @@
         </form>
     </div>
 
-    <!-- Tabla Historial -->
     <div class="card">
         <h2>📊 Historial de Consumos Guardados</h2>
         <div class="table-responsive">
@@ -129,10 +85,11 @@
                 <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Lecturas (P1 / P2)</th>
-                        <th>Consumo (P1 / P2)</th>
+                        <th>Lecturas (Erick / Est.)</th>
+                        <th>Consumo Neto</th>
                         <th>Porcentaje %</th>
-                        <th>A Pagar ($)</th>
+                        <th>A Pagar</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -142,18 +99,18 @@
                         <td>{{ reg.lectura_p1 }} / {{ reg.lectura_p2 }} kWh</td>
                         <td>{{ reg.consumo_p1 }} / {{ reg.consumo_p2 }} kWh</td>
                         <td>
-                            <span class="badge">P1: {{ reg.porcentaje_p1 }}%</span>
-                            <span class="badge" style="background:#fef3c7; color:#b45309;">P2: {{ reg.porcentaje_p2 }}%</span>
+                            <span class="badge">Erick: {{ reg.porcentaje_p1 }}%</span><br>
+                            <span class="badge" style="background:#fef3c7; color:#b45309;">Esteban: {{ reg.porcentaje_p2 }}%</span>
                         </td>
                         <td>
-                            <strong>P1:</strong> ${{ "{:,.0f}".format(reg.pago_p1) }}<br>
-                            <strong>P2:</strong> ${{ "{:,.0f}".format(reg.pago_p2) }}
+                            <strong>Erick:</strong> ${{ "{:,.0f}".format(reg.pago_p1) }}<br>
+                            <strong>Esteban:</strong> ${{ "{:,.0f}".format(reg.pago_p2) }}
                         </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #64748b; padding: 20px;">
-                            No hay registros guardados todavía.
+                        <td>
+                            <!-- FORMULARIO ELIMINAR -->
+                            <form action="{{ url_for('eliminar', id=reg.id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
+                                <button type="submit" class="btn-delete">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -164,50 +121,49 @@
 </div>
 
 <script>
-    // Coloca la fecha de hoy automáticamente al cargar
     document.getElementById('fecha_lectura').valueAsDate = new Date();
+
+    // Capturamos el último registro real de la tabla de forma segura usando Jinja
+    const ult_p1 = parseFloat("{% if historial %}{{ historial[0].lectura_p1 }}{% else %}0{% endif %}");
+    const ult_p2 = parseFloat("{% if historial %}{{ historial[0].lectura_p2 }}{% else %}0{% endif %}");
 
     function calcularEnPantalla() {
         const inputP1 = parseFloat(document.getElementById('valor_p1').value) || 0;
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
 
-        // Validación: Obligar a ingresar datos en ambos campos
         if(inputP1 <= 0 || inputP2 <= 0) {
-            alert("Por favor, ingresa las lecturas mayores a 0 para ambas personas primero.");
+            alert("Ingresa valores válidos.");
             return;
         }
 
-        // LÓGICA AUTÓNOMA INTELEGENTE:
-        // Calculamos los porcentajes directamente sobre el total acumulado actual de los medidores.
-        // Esto garantiza que el cálculo de porcentajes y montos funcione SIEMPRE al instante.
-        let totalAcumulado = inputP1 + inputP2;
-        let pct1 = 0, pct2 = 0;
-        let pago1 = 0, pago2 = 0;
+        // Restar estrictamente contra la última lectura real base de la tabla
+        let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
+        let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
+        let totalCons = cons1 + cons2;
 
-        if (totalAcumulado > 0) {
-            pct1 = (inputP1 / totalAcumulado) * 100;
-            pct2 = (inputP2 / totalAcumulado) * 100;
+        let pct1 = 0, pct2 = 0, pago1 = 0, pago2 = 0;
+
+        if (totalCons > 0) {
+            pct1 = (cons1 / totalCons) * 100;
+            pct2 = (cons2 / totalCons) * 100;
             pago1 = (pct1 / 100) * monto;
             pago2 = (pct2 / 100) * monto;
         }
 
-        // Mostrar valores calculados en la caja de previsualización en pantalla
-        document.getElementById('p_cons1').innerText = inputP1.toFixed(2);
-        document.getElementById('p_cons2').innerText = inputP2.toFixed(2);
-        document.getElementById('p_pct1').innerText = pct1.toFixed(2);
-        document.getElementById('p_pct2').innerText = pct2.toFixed(2);
-        
-        // Formatear montos en dinero chileno/estándar sin decimales
+        document.getElementById('p_cons1').innerText = cons1.toFixed(1);
+        document.getElementById('p_cons2').innerText = cons2.toFixed(1);
+        document.getElementById('p_pct1').innerText = pct1.toFixed(1);
+        document.getElementById('p_pct2').innerText = pct2.toFixed(1);
         document.getElementById('p_pago1').innerText = Math.round(pago1).toLocaleString('es-CL');
         document.getElementById('p_pago2').innerText = Math.round(pago2).toLocaleString('es-CL');
 
-        // Hacer visible la caja gris y habilitar el botón verde de guardar
         document.getElementById('previewBox').style.display = 'block';
-        
         const btnGuardar = document.getElementById('btnGuardar');
         btnGuardar.disabled = false;
         btnGuardar.style.opacity = "1";
         btnGuardar.style.cursor = "pointer";
     }
 </script>
+</body>
+</html>
