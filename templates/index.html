@@ -34,7 +34,6 @@
         .form-group { margin-bottom: 18px; width: 100%; display: flex; flex-direction: column; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #475569; }
         
-        /* EL PARCHE MAESTRO: Forza a que midan idéntico en iPhone y Android */
         input[type="number"], input[type="date"] { 
             width: 100% !important; 
             max-width: 100% !important;
@@ -44,17 +43,27 @@
             font-size: 16px !important;
             box-sizing: border-box !important;
             display: block !important;
-            -webkit-appearance: none !important; /* Quita el diseño rebelde de Apple */
+            -webkit-appearance: none !important;
             appearance: none !important;
         }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%; }
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 4px solid var(--danger);
+        }
+        
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
         .btn-group { display: flex; gap: 12px; width: 100%; }
         button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-calc { background-color: var(--primary); color: white; }
         .btn-save { background-color: var(--success); color: white; }
-        .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; }
+        .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; cursor: pointer; }
         
         .preview-box { background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid var(--primary); display: none; }
         .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
@@ -75,6 +84,12 @@
         </div>
         <h2>⚡ Registro de Medidor</h2>
         
+        {% if error_validacion %}
+        <div class="alert-danger">
+            {{ error_validacion }}
+        </div>
+        {% endif %}
+        
         <form action="/" method="POST" id="medidorForm">
             <div class="form-group">
                 <label for="fecha_lectura">Fecha de la Lectura</label>
@@ -92,6 +107,7 @@
             </div>
             
             <hr>
+            
             <div class="form-group">
                 <label for="monto_boleta">Monto Total de la Boleta ($)</label>
                 <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000">
@@ -107,7 +123,9 @@
                     <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed var(--border); padding-top: 5px;">
                         <strong>A Pagar Erick:</strong> $<span id="p_pago1">0</span>
                     </div>
-                    <div><strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span></div>
+                    <div style="grid-column: span 2;">
+                        <strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -168,54 +186,59 @@
 
     const ult_p1 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %}");
     const ult_p2 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %}");
+    const ult_fecha = "{% if ultimo %}{{ ultimo.fecha.strftime('%Y-%m-%d') }}{% else %}{% endif %}";
 
-        function calcularEnPantalla() {
+    function calcularEnPantalla() {
+        const inputFecha = document.getElementById('fecha_lectura').value;
         const inputP1 = parseFloat(document.getElementById('valor_p1').value) || 0;
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
+
+        if(!inputFecha) {
+            alert("Por favor, selecciona una fecha válida.");
+            return;
+        }
 
         if(inputP1 <= 0 || inputP2 <= 0) {
             alert("Por favor, ingresa valores válidos mayores a 0.");
             return;
         }
 
-        // ALERTA VISUAL INTEGRADA: Bloquea el cálculo si el valor es menor al último registro guardado
-        if (ult_p1 > 0 && inputP1 < ult_p1) {
-            alert(`⚠️ Atención Erick: Tu lectura ingresada (${inputP1} kWh) es MENOR a la última guardada (${ult_p1} kWh). Por favor verifícala.`);
-            return;
-        }
-        if (ult_p2 > 0 && inputP2 < ult_p2) {
-            alert(`⚠️ Atención Esteban: Tu lectura ingresada (${inputP2} kWh) es MENOR a la última guardada (${ult_p2} kWh). Por favor verifícala.`);
-            return;
-        }
-
-        let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
-        let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
-        let totalCons = cons1 + cons2;
-
-        let pct1 = 0, pct2 = 0, pago1 = 0, pago2 = 0;
-
-        if (totalCons > 0) {
-            pct1 = (cons1 / totalCons) * 100;
-            pct2 = (cons2 / totalCons) * 100;
-            pago1 = (pct1 / 100) * monto;
-            pago2 = (pct2 / 100) * monto;
-        }
-
-        document.getElementById('p_cons1').innerText = cons1.toFixed(1);
-        document.getElementById('p_cons2').innerText = cons2.toFixed(1);
-        document.getElementById('p_pct1').innerText = pct1.toFixed(1);
-        document.getElementById('p_pct2').innerText = pct2.toFixed(1);
-        document.getElementById('p_pago1').innerText = Math.round(pago1).toLocaleString('es-CL');
-        document.getElementById('p_pago2').innerText = Math.round(pago2).toLocaleString('es-CL');
-
-        document.getElementById('previewBox').style.display = 'block';
-        const btnGuardar = document.getElementById('btnGuardar');
-        btnGuardar.disabled = false;
-        btnGuardar.style.opacity = "1";
-        btnGuardar.style.cursor = "pointer";
-    }
-
-</script>
-</body>
-</html>
+        // 1. ESCUDO DE FECHA CORREGIDO: Formatea la alerta como DD/MM/YYYY
+        if (ult_fecha && inputFecha <= ult_fecha) {
+            const fPartes = ult_fecha.split('-');
+            const fFormateada = `${fPartes[2]}/${fPartes[1]}/${fPartes[0]}`;
+alert(⚠️ Atención: La fecha seleccionada debe ser posterior al último corte guardado (${fFormateada}).);
+return;
+}
+// 2. ESCUDO DE LECTURAS
+if (ult_p1 > 0 && inputP1 < ult_p1) {
+alert(⚠️ Atención Erick: Tu lectura ingresada (${inputP1} kWh) es MENOR a la última guardada (${ult_p1} kWh). Por favor verifícala.);
+return;
+}
+if (ult_p2 > 0 && inputP2 < ult_p2) {
+alert(⚠️ Atención Esteban: Tu lectura ingresada (${inputP2} kWh) es MENOR a la última guardada (${ult_p2} kWh). Por favor verifícala.);
+return;
+}
+let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
+let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
+let totalCons = cons1 + cons2;
+let pct1 = 0, pct2 = 0, pago1 = 0, pago2 = 0;
+if (totalCons > 0) {
+pct1 = (cons1 / totalCons) * 100;
+pct2 = (cons2 / totalCons) * 100;
+pago1 = (pct1 / 100) * monto;
+pago2 = (pct2 / 100) * monto;
+}
+document.getElementById('p_cons1').innerText = cons1.toFixed(1);
+document.getElementById('p_cons2').innerText = cons2.toFixed(1);
+document.getElementById('p_pct1').innerText = pct1.toFixed(1);
+document.getElementById('p_pct2').innerText = pct2.toFixed(1);
+document.getElementById('p_pago1').innerText = Math.round(pago1).toLocaleString('es-CL');
+document.getElementById('p_pago2').innerText = Math.round(pago2).toLocaleString('es-CL');
+document.getElementById('previewBox').style.display = 'block';
+const btnGuardar = document.getElementById('btnGuardar');
+btnGuardar.disabled = false;
+btnGuardar.style.opacity = "1";
+btnGuardar.style.cursor = "pointer";
+}
