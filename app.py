@@ -5,16 +5,26 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configuración Inteligente y Segura de Base de Datos
+# Configuración Segura y Estructurada de Base de Datos
 if os.environ.get('RENDER'):
-    # En internet leerá la URL directamente desde el panel seguro de Render
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    from sqlalchemy.engine import URL
+    # Armamos la conexión de forma segura leyendo pieza por pieza desde Render
+    connection_url = URL.create(
+        drivername="postgresql+pg8000",
+        username=os.environ.get('DB_USER'),
+        password=os.environ.get('DB_PASSWORD'),
+        host=os.environ.get('DB_HOST'),
+        port=int(os.environ.get('DB_PORT', 6543)),
+        database="postgres"
+    )
+    app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
 else:
     # Tu configuración local de PC que te corre excelente
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
 
 # Modelo SQL
 class RegistroMedidor(db.Model):
