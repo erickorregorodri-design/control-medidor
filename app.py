@@ -7,9 +7,9 @@ DATABASE_DIR = '/app/data'
 if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):
     if not os.path.exists(DATABASE_DIR):
         os.makedirs(DATABASE_DIR, exist_ok=True)
-    DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores_v2.db')
+        DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores_final.db')
 else:
-    DATABASE_PATH = 'medidores_v2.db'
+    DATABASE_PATH = 'medidores_final.db'
 
 app = Flask(__name__)
 app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
