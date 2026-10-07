@@ -27,7 +27,8 @@
         .container { max-width: 100%; width: 400px; display: flex; flex-direction: column; gap: 20px; }
         .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); width: 100%; }
         
-        .logout-container { text-align: right; margin-bottom: 12px; width: 100%; }
+        .logout-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%; }
+        .user-badge { font-size: 12px; background: #e2e8f0; padding: 4px 8px; border-radius: 20px; font-weight: 500; }
         .logout-link { color: var(--danger); text-decoration: none; font-size: 14px; font-weight: bold; }
         
         h2 { margin-bottom: 20px; color: #0f172a; text-align: center; font-size: 22px; }
@@ -42,9 +43,6 @@
             border-radius: 6px !important; 
             font-size: 16px !important;
             box-sizing: border-box !important;
-            display: block !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
         }
         
         .alert-danger {
@@ -59,8 +57,8 @@
         }
         
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
-        .btn-group { display: flex; gap: 12px; width: 100%; }
-        button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-calc { background-color: var(--primary); color: white; }
         .btn-save { background-color: var(--success); color: white; }
         .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; cursor: pointer; }
@@ -73,50 +71,53 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         th { background-color: #f1f5f9; color: #475569; font-weight: 600; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: #e0f2fe; color: #0369a1; display: inline-block; margin-bottom: 4px; }
+        
+        .admin-only { display: block; }
+        body.rol-lectura .admin-only { display: none !important; }
     </style>
+    <script src="https://jsdelivr.net"></script>
 </head>
-<body>
+<body class="rol-{{ session.get('rol') }}">
 
 <div class="container">
     <div class="card">
         <div class="logout-container">
-                    <!-- Barra de Seguridad con Reloj Visible -->
+            <span class="user-badge">👤 {{ 'Administrador' if session.get('rol') == 'administrador' else 'Solo Vista' }}</span>
+            <a href="/logout" class="logout-link">🔒 Cerrar Sesión</a>
+        </div>
+        
         <div style="background-color: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-left: 4px solid var(--danger);">
             <span style="font-size: 12px; font-weight: bold; color: #475569;">🔒 Seguridad</span>
             <span style="font-size: 14px; font-weight: bold; color: var(--danger);" id="reloj_pantalla">01:00</span>
         </div>
 
-            <a href="/logout" class="logout-link">🔒 Cerrar Sesión</a>
-        </div>
         <h2>⚡ Registro de Medidor</h2>
         
         {% if error_validacion %}
-        <div class="alert-danger">
-            {{ error_validacion }}
-        </div>
+        <div class="alert-danger">{{ error_validacion }}</div>
         {% endif %}
         
         <form action="/" method="POST" id="medidorForm">
             <div class="form-group">
                 <label for="fecha_lectura">Fecha de la Lectura</label>
-                <input type="date" id="fecha_lectura" name="fecha_lectura" required>
+                <input type="date" id="fecha_lectura" name="fecha_lectura" required {% if session.get('rol') == 'solo_lectura' %}disabled{% endif %}>
             </div>
             
             <div class="form-group">
                 <label for="valor_p1">Lectura Erick (kWh)</label>
-                <input type="number" step="0.01" id="valor_p1" name="valor_p1" required placeholder="0.00">
+                <input type="number" step="0.01" id="valor_p1" name="valor_p1" required placeholder="0.00" {% if session.get('rol') == 'solo_lectura' %}disabled{% endif %}>
             </div>
             
             <div class="form-group">
                 <label for="valor_p2">Lectura Esteban (kWh)</label>
-                <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00">
+                <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00" {% if session.get('rol') == 'solo_lectura' %}disabled{% endif %}>
             </div>
             
             <hr>
             
             <div class="form-group">
                 <label for="monto_boleta">Monto Total de la Boleta ($)</label>
-                <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000">
+                <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000" {% if session.get('rol') == 'solo_lectura' %}disabled{% endif %}>
             </div>
 
             <div class="preview-box" id="previewBox">
@@ -135,11 +136,15 @@
                 </div>
             </div>
 
-            <div class="btn-group">
+            <div class="btn-group admin-only">
                 <button type="button" class="btn-calc" onclick="calcularEnPantalla()">1. Calcular</button>
-                <button type="submit" class="btn-save" id="btnGuardar" disabled style="opacity: 0.5; cursor: not-allowed;">2. Guardar en Base de Datos</button>
+                <button type="submit" class="btn-save" id="btnGuardar" disabled style="opacity: 0.5; cursor: not-allowed; margin-top:5px;">2. Guardar en Base de Datos</button>
             </div>
         </form>
+    </div>
+    <div class="card">
+        <h2>📊 Evolución de Consumos</h2>
+        <canvas id="graficoConsumos" width="100" height="70"></canvas>
     </div>
 
     <div class="card">
@@ -153,7 +158,7 @@
                         <th>Consumo Neto</th>
                         <th>Porcentaje %</th>
                         <th>A Pagar</th>
-                        <th>Acción</th>
+                        <th class="admin-only">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -170,9 +175,10 @@
                             <strong>Erick:</strong> ${{ "{:,.0f}".format(reg.pago_p1) }}<br>
                             <strong>Esteban:</strong> ${{ "{:,.0f}".format(reg.pago_p2) }}
                         </td>
-                        <td>
+                        <td class="admin-only">
+                            <button type="button" class="btn-calc" style="padding: 6px 10px; font-size: 12px; margin-bottom: 5px; width: 100%;" onclick="activarEdicion('{{ reg.id }}', '{{ reg.fecha.strftime('%Y-%m-%d') }}', '{{ reg.lectura_p1 }}', '{{ reg.lectura_p2 }}', '{{ reg.monto_boleta }}')">✏️ Editar</button>
                             <form action="{{ url_for('eliminar', id=reg.id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
-                                <button type="submit" class="btn-delete">Eliminar</button>
+                                <button type="submit" class="btn-delete" style="width: 100%;">Eliminar</button>
                             </form>
                         </td>
                     </tr>
@@ -186,7 +192,6 @@
         </div>
     </div>
 </div>
-
 <script>
     document.getElementById('fecha_lectura').valueAsDate = new Date();
 
@@ -200,29 +205,11 @@
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
 
-        if(!inputFecha) {
-            alert("Por favor, selecciona una fecha válida.");
-            return;
-        }
+        if(!inputFecha) { alert("Por favor, selecciona una fecha válida."); return; }
+        if(inputP1 <= 0 || inputP2 <= 0) { alert("Por favor, ingresa valores válidos mayores a 0."); return; }
 
-        if(inputP1 <= 0 || inputP2 <= 0) {
-            alert("Por favor, ingresa valores válidos mayores a 0.");
-            return;
-        }
-
-        // 1. ESCUDO DE FECHA
-        if (ult_fecha && inputFecha <= ult_fecha) {
+        if (ult_fecha && inputFecha <= ult_fecha && !document.getElementById('btnCancelarEdicion')) {
             alert("⚠️ Fecha incorrecta");
-            return;
-        }
-
-        // 2. ESCUDO DE LECTURAS
-        if (ult_p1 > 0 && inputP1 < ult_p1) {
-            alert("⚠️ Lectura Erick menor");
-            return;
-        }
-        if (ult_p2 > 0 && inputP2 < ult_p2) {
-            alert("⚠️ Lectura Esteban menor");
             return;
         }
 
@@ -252,7 +239,71 @@
         btnGuardar.style.opacity = "1";
         btnGuardar.style.cursor = "pointer";
     }
-        // MOTOR DEL TEMPORIZADOR VISUAL (5 MINUTOS)
+
+    function activarEdicion(id, fecha, p1, p2, monto) {
+        const form = document.getElementById('medidorForm');
+        form.action = `/editar/${id}`;
+        
+        document.getElementById('fecha_lectura').value = fecha;
+        document.getElementById('valor_p1').value = p1;
+        document.getElementById('valor_p2').value = p2;
+        document.getElementById('monto_boleta').value = monto || "";
+        
+        const btnGuardar = document.getElementById('btnGuardar');
+        btnGuardar.innerText = "🔄 Actualizar Registro";
+        btnGuardar.style.backgroundColor = "#2563eb";
+        btnGuardar.disabled = false;
+        btnGuardar.style.opacity = "1";
+        
+        if (!document.getElementById('btnCancelarEdicion')) {
+            const btnCancelar = document.createElement('button');
+            btnCancelar.type = "button";
+            btnCancelar.id = "btnCancelarEdicion";
+            btnCancelar.innerText = "❌ Cancelar";
+            btnCancelar.style.backgroundColor = "#64748b";
+            btnCancelar.style.color = "white";
+            btnCancelar.style.marginTop = "10px";
+            btnCancelar.onclick = function() {
+                form.action = "/";
+                form.reset();
+                document.getElementById('fecha_lectura').valueAsDate = new Date();
+                btnGuardar.innerText = "2. Guardar en Base de Datos";
+                btnGuardar.style.backgroundColor = "var(--success)";
+                btnGuardar.disabled = true;
+                btnGuardar.style.opacity = "0.5";
+                this.remove();
+            };
+            btnGuardar.parentNode.appendChild(btnCancelar);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const fechasGrafico = [];
+    const consumoErick = [];
+    const consumoEsteban = [];
+
+    {% for r in historial_grafico %}
+        fechasGrafico.push("{{ r.fecha.strftime('%d/%m') }}");
+        consumoErick.push({{ r.consumo_p1 }});
+        consumoEsteban.push({{ r.consumo_p2 }});
+    {% endfor %}
+
+    const ctx = document.getElementById('graficoConsumos').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: fechasGrafico,
+            datasets: [
+                { label: 'Erick (kWh)', data: consumoErick, backgroundColor: '#2563eb' },
+                { label: 'Esteban (kWh)', data: consumoEsteban, backgroundColor: '#f59e0b' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
     let tiempoRestante = 60; 
     let intervaloReloj;
     let relojInactividad;
@@ -260,14 +311,11 @@
     function actualizarRelojVisual() {
         let minutos = Math.floor(tiempoRestante / 60);
         let segundos = tiempoRestante % 60;
-        
         segundos = segundos < 10 ? '0' + segundos : segundos;
         minutos = minutos < 10 ? '0' + minutos : minutos;
         
         const elemReloj = document.getElementById('reloj_pantalla');
-        if (elemReloj) {
-            elemReloj.innerText = `${minutos}:${segundos}`;
-        }
+        if (elemReloj) { elemReloj.innerText = `${minutos}:${segundos}`; }
         
         if (tiempoRestante <= 0) {
             clearInterval(intervaloReloj);
@@ -279,18 +327,11 @@
     function resetearReloj() {
         clearTimeout(relojInactividad);
         clearInterval(intervaloReloj);
-        
         tiempoRestante = 60;
         const elemReloj = document.getElementById('reloj_pantalla');
-        if (elemReloj) {
-            elemReloj.innerText = "01:00";
-        }
-        
+        if (elemReloj) { elemReloj.innerText = "01:00"; }
         intervaloReloj = setInterval(actualizarRelojVisual, 1000);
-        
-        relojInactividad = setTimeout(function() {
-            window.location.href = "/logout";
-        }, 60000);
+        relojInactividad = setTimeout(function() { window.location.href = "/logout"; }, 60000);
     }
 
     window.onload = resetearReloj;
@@ -298,8 +339,6 @@
     document.onkeypress = resetearReloj;
     document.ontouchstart = resetearReloj;
     document.onscroll = resetearReloj;
-
 </script>
 </body>
 </html>
-
