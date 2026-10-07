@@ -271,6 +271,15 @@
         tiempoRestante--;
     }, 1000);
 
+    // REINICIAR EL CONTADOR AL TOCAR O HACER CLIC EN CUALQUIER PARTE
+    document.addEventListener('click', function() {
+        tiempoRestante = 60;
+    });
+    
+    document.addEventListener('touchstart', function() {
+        tiempoRestante = 60;
+    });
+
     // LÓGICA INTERACTIVA DEL BOTÓN CALCULAR (Funciona también para el visor)
     document.getElementById('btnCalcular').addEventListener('click', function() {
         const p1_actual = parseFloat(document.getElementById('valor_p1').value) || 0;
