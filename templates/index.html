@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⚡ Control de Medidor</title>
     <style>
         :root { 
@@ -19,52 +19,55 @@
             font-family: system-ui, -apple-system, sans-serif; 
             background-color: var(--background); 
             color: var(--text); 
-            padding: 20px; 
+            padding: 16px; 
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
         }
-        .container { max-width: 750px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
-        .card { background: var(--card); padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); width: 100%; }
+        .container { max-width: 100%; width: 400px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); width: 100%; }
         
         .logout-container { text-align: right; margin-bottom: 12px; width: 100%; }
         .logout-link { color: var(--danger); text-decoration: none; font-size: 14px; font-weight: bold; }
-        .logout-link:hover { text-decoration: underline; }
         
-        h2 { margin-bottom: 20px; color: #0f172a; text-align: center; font-size: 24px; }
-        .form-group { margin-bottom: 18px; width: 100%; }
+        h2 { margin-bottom: 20px; color: #0f172a; text-align: center; font-size: 22px; }
+        .form-group { margin-bottom: 18px; width: 100%; display: flex; flex-direction: column; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #475569; }
         
+        /* EL PARCHE MAESTRO: Forza a que midan idéntico en iPhone y Android */
         input[type="number"], input[type="date"] { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid var(--border); 
-            border-radius: 6px; 
-            font-size: 16px;
-            box-sizing: border-box;
+            width: 100% !important; 
+            max-width: 100% !important;
+            padding: 12px !important; 
+            border: 1px solid var(--border) !important; 
+            border-radius: 6px !important; 
+            font-size: 16px !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            -webkit-appearance: none !important; /* Quita el diseño rebelde de Apple */
+            appearance: none !important;
         }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; gap: 0; } }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%; }
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
-        .btn-group { display: flex; gap: 12px; }
-        button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-group { display: flex; gap: 12px; width: 100%; }
+        button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-calc { background-color: var(--primary); color: white; }
         .btn-save { background-color: var(--success); color: white; }
         .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; }
-        .btn-delete:hover { background-color: var(--danger); color: white; }
+        
         .preview-box { background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid var(--primary); display: none; }
         .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
         
-        .table-responsive { overflow-x: auto; width: 100%; }
+        .table-responsive { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
         th { background-color: #f1f5f9; color: #475569; font-weight: 600; }
-        tr:hover { background-color: #f8fafc; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: #e0f2fe; color: #0369a1; display: inline-block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
+
 <div class="container">
     <div class="card">
         <div class="logout-container">
@@ -78,19 +81,17 @@
                 <input type="date" id="fecha_lectura" name="fecha_lectura" required>
             </div>
             
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="valor_p1">Lectura Erick (kWh)</label>
-                    <input type="number" step="0.01" id="valor_p1" name="valor_p1" required placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label for="valor_p2">Lectura Esteban (kWh)</label>
-                    <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00">
-                </div>
+            <div class="form-group">
+                <label for="valor_p1">Lectura Erick (kWh)</label>
+                <input type="number" step="0.01" id="valor_p1" name="valor_p1" required placeholder="0.00">
+            </div>
+            
+            <div class="form-group">
+                <label for="valor_p2">Lectura Esteban (kWh)</label>
+                <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00">
             </div>
             
             <hr>
-            
             <div class="form-group">
                 <label for="monto_boleta">Monto Total de la Boleta ($)</label>
                 <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000">
@@ -106,9 +107,7 @@
                     <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed var(--border); padding-top: 5px;">
                         <strong>A Pagar Erick:</strong> $<span id="p_pago1">0</span>
                     </div>
-                    <div style="grid-column: span 2;">
-                        <strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span>
-                    </div>
+                    <div><strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span></div>
                 </div>
             </div>
 
@@ -118,6 +117,7 @@
             </div>
         </form>
     </div>
+
     <div class="card">
         <h2>📊 Historial de Consumos Guardados</h2>
         <div class="table-responsive">
@@ -154,9 +154,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">
-                            No hay registros guardados todavía.
-                        </td>
+                        <td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">No hay registros guardados todavía.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
