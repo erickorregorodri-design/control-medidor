@@ -33,7 +33,7 @@ def controlar_tiempo_sesion():
 USUARIO_ADMIN = "admin"
 CLAVE_ADMIN = "medidor2026"
 
-USUARIO_LECTOR = "lector"
+USUARIO_LECTOR = "Karina"
 CLAVE_LECTOR = "vermedidor2026"
 
 # BASE DE DATOS LOCAL PERMANENTE E INFALIBLE BLINDADA
