@@ -3,32 +3,33 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-# Instanciamos la aplicación de Flask de forma limpia
+# Inicializamos Flask
 app = Flask(__name__)
 
-# LLAVE SECRETA: Necesaria para activar las sesiones seguras en Flask
-app.secret_key = 'mi_llave_secreta_super_segura_medidores'
+# LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
+app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 
-# Credenciales fijas de acceso
+# Credenciales fijas de acceso (Usuario y contraseña para tu celular)
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONFIGURACIÓN DIRECTA CRUDA (Para evitar que SQLAlchemy valide variables ocultas vacías)
-# Ponemos la clave web con el carácter '+' convertido a '%2B' de forma explícita
+# DIRECCIÓN FIJA DE SUPABASE CON CONECTOR POSTGRESQL + PSYCOPG2
+# Protegemos el signo más '+' de tu contraseña transformándolo en '%2B' para evitar errores de red
 URI_SUPABASE = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
 
-if os.environ.get('RENDER') or os.environ.get('RAILWAY_STATIC_URL') or os.environ.get('PORT'):
+# Configuración inteligente de Base de Datos (Si está en la nube o en tu PC)
+if os.environ.get('RENDER') or os.environ.get('PORT') or os.environ.get('DATABASE_URL'):
     app.config['SQLALCHEMY_DATABASE_URI'] = URI_SUPABASE
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# INICIALIZACIÓN DIRECTA (Ignora las variables automáticas de Railway)
+# Inicialización limpia de la base de datos
 db = SQLAlchemy()
 db.init_app(app)
 
-# Modelo SQL
+# Modelo de Tabla SQL
 class RegistroMedidor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Date, default=datetime.utcnow)
@@ -42,7 +43,7 @@ class RegistroMedidor(db.Model):
     pago_p1 = db.Column(db.Float, default=0.0)
     pago_p2 = db.Column(db.Float, default=0.0)
 
-# RUTA DEL LOGIN
+# RUTA: PANTALLA DE LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -54,13 +55,13 @@ def login():
             error = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.'
     return render_template('login.html', error=error)
 
-# RUTA PARA CERRAR SESIÓN
+# RUTA: CERRAR SESIÓN
 @app.route('/logout')
 def logout():
     session.pop('logeado', None)
     return redirect(url_for('login'))
 
-# RUTA PRINCIPAL PROTEGIDA
+# RUTA: PÁGINA PRINCIPAL PROTEGIDA
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if not session.get('logeado'):
@@ -79,7 +80,7 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # BUSCAR LA LECTURA ANTERIOR REAL
+        # Buscar la lectura inmediatamente anterior en la base de datos
         ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
                                               .order_by(RegistroMedidor.fecha.desc())\
                                               .first()
@@ -109,7 +110,7 @@ def index():
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
     return render_template('index.html', historial=historial, ultimo=ultimo_registro)
 
-# RUTA ELIMINAR PROTEGIDA
+# RUTA: ELIMINAR REGISTROS PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
