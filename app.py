@@ -2,29 +2,24 @@ import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy.engine import URL
 
 app = Flask(__name__)
 
-# Configuración Segura y Estructurada de Base de Datos
-if os.environ.get('RENDER'):
-    from sqlalchemy.engine import URL
-    # Armamos la conexión de forma segura leyendo pieza por pieza desde Render
-    connection_url = URL.create(
-        drivername="postgresql+pg8000",
-        username=os.environ.get('DB_USER'),
-        password=os.environ.get('DB_PASSWORD'),
-        host=os.environ.get('DB_HOST'),
-        port=int(os.environ.get('DB_PORT', 6543)),
-        database="postgres"
-    )
-    app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
-else:
-    # Tu configuración local de PC que te corre excelente
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
+# CONFIGURACIÓN DEFINITIVA Y DIRECTA
+# Tomamos las variables limpias que pusiste en Render y armamos la conexión
+connection_url = URL.create(
+    drivername="postgresql+pg8000",
+    username=os.environ.get('DB_USER', 'postgres.eczhbmjltaropyzagdww'),
+    password=os.environ.get('DB_PASSWORD', 'kx?EQ-65D+vcqYV'),
+    host=os.environ.get('DB_HOST', '://supabase.com'),
+    port=int(os.environ.get('DB_PORT', 6543)),
+    database="postgres"
+)
 
+app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
 
 # Modelo SQL
 class RegistroMedidor(db.Model):
@@ -81,7 +76,6 @@ def index():
         db.session.commit()
         return redirect(url_for('index'))
     
-    # Se obtienen los datos de forma correcta
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
     
@@ -95,12 +89,10 @@ def eliminar(id):
     db.session.commit()
     return redirect(url_for('index'))
 
-# CORRECCIÓN EN EL ARRANQUE SEGURO CON CONTEXTO ACTIVO
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True, port=8080)
 else:
-    # Bloque exclusivo para que Render cree la base de datos al desplegar en internet
     with app.app_context():
         db.create_all()
