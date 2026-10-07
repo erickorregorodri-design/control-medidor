@@ -5,28 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🔒 Acceso Privado</title>
     <style>
+        /* COLORES POR DEFECTO (MODO CLARO) */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-label: #475569;
+            --bg-input: #ffffff;
+            --border-input: #cbd5e1;
+            --text-input: #0f172a;
+            --btn-color: #0b4bc4;
+            --btn-hover: #1d4ed8;
+            --border-card: rgba(0, 0, 0, 0.05);
+        }
+
+        /* COLORES SI EL IPHONE ESTÁ EN MODO OSCURO */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #121212;
+                --bg-card: #1e1e1e;
+                --text-main: #ffffff;
+                --text-label: #aeaeae;
+                --bg-input: #2a2a2a;
+                --border-input: #3d3d3d;
+                --text-input: #ffffff;
+                --btn-color: #0b4bc4;
+                --btn-hover: #1d4ed8;
+                --border-card: #2d2d2d;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #121212;
+            background-color: var(--bg-body);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
             padding: 16px;
+            transition: background-color 0.3s;
         }
         .login-card {
-            background-color: #1e1e1e;
+            background-color: var(--bg-card);
             padding: 32px 24px;
             border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 340px;
             text-align: center;
-            border: 1px solid #2d2d2d;
+            border: 1px solid var(--border-card);
+            transition: background-color 0.3s, border-color 0.3s;
         }
         h2 { 
-            color: #ffffff; 
+            color: var(--text-main); 
             margin-bottom: 28px; 
             font-size: 24px; 
             display: flex; 
@@ -43,30 +76,30 @@
             display: block; 
             margin-bottom: 8px; 
             font-size: 14px; 
-            color: #aeaeae; 
+            color: var(--text-label); 
             font-weight: 500;
         }
         input {
             width: 100%;
             padding: 14px;
-            background-color: #2a2a2a;
-            border: 1px solid #3d3d3d;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-input);
             border-radius: 8px;
             font-size: 16px;
-            color: #ffffff;
+            color: var(--text-input);
             box-sizing: border-box;
         }
         input::placeholder {
-            color: #666666;
+            color: #888888;
         }
         input:focus { 
             outline: none;
-            border-color: #2563eb; 
+            border-color: var(--btn-hover); 
         }
         button {
             width: 100%;
             padding: 14px;
-            background-color: #0b4bc4;
+            background-color: var(--btn-color);
             color: white;
             border: none;
             border-radius: 8px;
@@ -74,10 +107,10 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: background 0.2s;
+            transition: background-color 0.2s;
         }
         button:hover { 
-            background-color: #1d4ed8; 
+            background-color: var(--btn-hover); 
         }
         .error { 
             color: #fca5a5; 
