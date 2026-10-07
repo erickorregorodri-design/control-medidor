@@ -251,7 +251,7 @@
 </div>
 
 <script>
-    // LÓGICA DE TIEMPO DEL RELOJ SUPERIOR (Cuenta regresiva estándar de 5 minutos)
+    // LÓGICA DE TIEMPO DEL RELOJ SUPERIOR (1 minuto exactO)
     let tiempoRestante = 60; 
     const relojNodo = document.getElementById('reloj_pantalla');
     
@@ -271,7 +271,7 @@
         tiempoRestante--;
     }, 1000);
 
-    // REINICIAR EL CONTADOR AL TOCAR O HACER CLIC EN CUALQUIER PARTE
+    // REINICIAR EL CONTADOR AL TOCAR O HACER CLIC EN CUALQUIER PARTE (PC Y MÓVIL)
     document.addEventListener('click', function() {
         tiempoRestante = 60;
     });
@@ -280,13 +280,12 @@
         tiempoRestante = 60;
     });
 
-    // LÓGICA INTERACTIVA DEL BOTÓN CALCULAR (Funciona también para el visor)
+    // LÓGICA INTERACTIVA DEL BOTÓN CALCULAR
     document.getElementById('btnCalcular').addEventListener('click', function() {
         const p1_actual = parseFloat(document.getElementById('valor_p1').value) || 0;
         const p2_actual = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto_boleta = parseFloat(document.getElementById('monto_boleta').value) || 0;
         
-        // Carga de lecturas anteriores tomadas de la base de datos a través de Jinja
         const p1_anterior = {% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %};
         const p2_anterior = {% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %};
         
@@ -315,3 +314,4 @@
 
 </body>
 </html>
+
