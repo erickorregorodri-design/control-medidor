@@ -2,8 +2,8 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy.engine import URL
 
+# Instanciamos la aplicación de Flask de forma limpia
 app = Flask(__name__)
 
 # LLAVE SECRETA: Necesaria para activar las sesiones seguras en Flask
@@ -13,18 +13,20 @@ app.secret_key = 'mi_llave_secreta_super_segura_medidores'
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONFIGURACIÓN DE BASE DE DATOS
-connection_url = URL.create(
-    drivername="postgresql+pg8000",
-    username=os.environ.get('DB_USER', 'postgres.eczhbmjltaropyzagdww'),
-    password=os.environ.get('DB_PASSWORD', 'kx?EQ-65D+vcqYV'),
-    host=os.environ.get('DB_HOST', '://supabase.com'),
-    port=int(os.environ.get('DB_PORT', 6543)),
-    database="postgres"
-)
-app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
+# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC usa SQLite / Internet usa Supabase de forma directa)
+if os.environ.get('RENDER') or os.environ.get('RAILWAY_STATIC_URL') or os.environ.get('PORT'):
+    # Cadena directa y robusta con el conector estándar de la industria (+psycopg2)
+    # Cambiamos el signo más '+' por '%2B' para cumplir las reglas de SQLAlchemy en la nube
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
+else:
+    # Tu configuración de PC local que te corre excelente
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+
+# INICIALIZACIÓN FORZADA CONTROLADA
+db = SQLAlchemy()
+db.init_app(app)
 
 # Modelo SQL
 class RegistroMedidor(db.Model):
@@ -61,7 +63,6 @@ def logout():
 # RUTA PRINCIPAL PROTEGIDA
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # Si no ha iniciado sesión, lo mandamos al login obligatoriamente
     if not session.get('logeado'):
         return redirect(url_for('login'))
         
@@ -78,6 +79,7 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
+        # BUSCAR LA LECTURA INMEDIATAMENTE ANTERIOR EN LA HISTORIA
         ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
                                               .order_by(RegistroMedidor.fecha.desc())\
                                               .first()
