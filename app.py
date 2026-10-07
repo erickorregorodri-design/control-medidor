@@ -5,19 +5,12 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configuración de Base de Datos (Render vs Local)
+# Configuración inteligente de Base de Datos (Render usa Supabase / PC local usa SQLite)
 if os.environ.get('RENDER'):
-    from sqlalchemy.engine import URL
-    connection_url = URL.create(
-        drivername="postgresql+pg8000",
-        username="postgres.eczhbmjltaropyzagdww",
-        password="kx?EQ-65D+vcqYV",
-        host="://supabase.com",
-        port=6543,
-        database="postgres"
-    )
-    app.config['SQLALCHEMY_DATABASE_URI'] = connection_url
+    # Cadena de texto directa usando el Session Pooler (Puerto 6543) compatible con IPv4 en la nube
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+pg8000://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@://supabase.com'
 else:
+    # Tu configuración local de PC que ya te funciona perfecto
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
