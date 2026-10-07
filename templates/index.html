@@ -169,13 +169,23 @@
     const ult_p1 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %}");
     const ult_p2 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %}");
 
-    function calcularEnPantalla() {
+        function calcularEnPantalla() {
         const inputP1 = parseFloat(document.getElementById('valor_p1').value) || 0;
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
 
         if(inputP1 <= 0 || inputP2 <= 0) {
             alert("Por favor, ingresa valores válidos mayores a 0.");
+            return;
+        }
+
+        // ALERTA VISUAL INTEGRADA: Bloquea el cálculo si el valor es menor al último registro guardado
+        if (ult_p1 > 0 && inputP1 < ult_p1) {
+            alert(`⚠️ Atención Erick: Tu lectura ingresada (${inputP1} kWh) es MENOR a la última guardada (${ult_p1} kWh). Por favor verifícala.`);
+            return;
+        }
+        if (ult_p2 > 0 && inputP2 < ult_p2) {
+            alert(`⚠️ Atención Esteban: Tu lectura ingresada (${inputP2} kWh) es MENOR a la última guardada (${ult_p2} kWh). Por favor verifícala.`);
             return;
         }
 
@@ -205,6 +215,7 @@
         btnGuardar.style.opacity = "1";
         btnGuardar.style.cursor = "pointer";
     }
+
 </script>
 </body>
 </html>
