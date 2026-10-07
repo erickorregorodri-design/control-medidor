@@ -18,6 +18,17 @@ app = Flask(__name__)
 # LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
 app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 
+# CONTROL DE TIEMPO: Cierre automático a los 5 minutos de inactividad
+from datetime import timedelta
+
+@app.before_request
+def controlar_tiempo_sesion():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=5)
+    if 'logeado' in session:
+        session.modified = True
+
+
 # Credenciales fijas de acceso para tu teléfono celular
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
