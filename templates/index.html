@@ -35,7 +35,19 @@
         h2 { margin-bottom: 20px; color: #0f172a; text-align: center; font-size: 24px; }
         .form-group { margin-bottom: 18px; width: 100%; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #475569; }
-        input[type="number"], input[type="date"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; }
+        
+        /* Ajuste milimétrico para que la fecha y los números midan exactamente lo mismo */
+        input[type="number"], input[type="date"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 16px;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; gap: 0; } }
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
@@ -165,7 +177,6 @@
 <script>
     document.getElementById('fecha_lectura').valueAsDate = new Date();
 
-    // Capturamos el último registro real de forma segura
     const ult_p1 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %}");
     const ult_p2 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %}");
 
@@ -179,7 +190,6 @@
             return;
         }
 
-        // Restar estrictamente contra la última lectura real base de la tabla
         let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
         let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
         let totalCons = cons1 + cons2;
