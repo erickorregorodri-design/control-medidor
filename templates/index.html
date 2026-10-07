@@ -204,20 +204,19 @@
             return;
         }
 
-        // 1. ESCUDO DE FECHA CORREGIDO: Formatea la alerta como DD/MM/YYYY
+                // 1. ESCUDO DE FECHA
         if (ult_fecha && inputFecha <= ult_fecha) {
-            const fPartes = ult_fecha.split('-');
-            const fFormateada = `${fPartes[2]}/${fPartes[1]}/${fPartes[0]}`;
-        alert("⚠️ Atención: La fecha seleccionada debe ser posterior al último corte.");
-        return;
-    }
+            alert("⚠️ Fecha incorrecta");
+            return;
+        }
 
-    // 2. ESCUDO DE LECTURAS
-    if (ult_p1 > 0 && inputP1 < ult_p1) {
-        alert("⚠️ Atención Erick: Tu lectura ingresada es MENOR a la última guardada.");
-        return;
-    }
-    if (ult_p2 > 0 && inputP2 < ult_p2) {
-        alert("⚠️ Atención Esteban: Tu lectura ingresada es MENOR a la última guardada.");
-        return;
-    }
+        // 2. ESCUDO DE LECTURAS
+        if (ult_p1 > 0 && inputP1 < ult_p1) {
+            alert("⚠️ Lectura Erick menor");
+            return;
+        }
+        if (ult_p2 > 0 && inputP2 < ult_p2) {
+            alert("⚠️ Lectura Esteban menor");
+            return;
+        }
+
