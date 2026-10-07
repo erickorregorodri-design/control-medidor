@@ -32,7 +32,6 @@ class RegistroMedidor(db.Model):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    db.create_all()
     if request.method == 'POST':
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
@@ -78,14 +77,20 @@ def index():
     
     return render_template('index.html', historial=historial, ultimo=ultimo_registro)
 
-# NUEVA RUTA PARA ELIMINAR REGISTROS CORREGIDA
+# RUTA PARA ELIMINAR REGISTROS
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
-    registro = RegistroMedidor.query.get_or_404(id)  # <--- Corregido a get_or_404
+    registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
     return redirect(url_for('index'))
 
+# CORRECCIÓN EN EL ARRANQUE SEGURO CON CONTEXTO ACTIVO
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True, port=8080)
-
+else:
+    # Bloque exclusivo para que Render cree la base de datos al desplegar en internet
+    with app.app_context():
+        db.create_all()
