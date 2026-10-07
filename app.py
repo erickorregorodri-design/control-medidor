@@ -24,14 +24,17 @@ from datetime import timedelta
 @app.before_request
 def controlar_tiempo_sesion():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=1)
+    app.permanent_session_lifetime = timedelta(minutes=5) # Ajustado a 5 minutos estándar
     if 'logeado' in session:
         session.modified = True
 
 
-# Credenciales fijas de acceso para tu teléfono celular
-USUARIO_CORRECTO = "admin"
-CLAVE_CORRECTA = "medidor2026"
+# Credenciales fijas de acceso para tu sistema
+USUARIO_ADMIN = "admin"
+CLAVE_ADMIN = "medidor2026"
+
+USUARIO_LECTOR = "lector"
+CLAVE_LECTOR = "vermedidor2026"
 
 # BASE DE DATOS LOCAL PERMANENTE E INFALIBLE BLINDADA
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
@@ -60,8 +63,16 @@ class RegistroMedidor(db.Model):
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] == USUARIO_CORRECTO and request.form['password'] == CLAVE_CORRECTA:
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username == USUARIO_ADMIN and password == CLAVE_ADMIN:
             session['logeado'] = True
+            session['role'] = 'admin'
+            return redirect(url_for('index'))
+        elif username == USUARIO_LECTOR and password == CLAVE_LECTOR:
+            session['logeado'] = True
+            session['role'] = 'viewer'
             return redirect(url_for('index'))
         else:
             error = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.'
@@ -71,6 +82,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logeado', None)
+    session.pop('role', None)
     return redirect(url_for('login'))
 
 # RUTA: PÁGINA PRINCIPAL PROTEGIDA
@@ -80,11 +92,16 @@ def index():
         return redirect(url_for('login'))
         
     error_validacion = None
+    role = session.get('role', 'viewer') # Capturamos el rol actual ('admin' o 'viewer')
     
     # Obtener el último registro base antes de cualquier acción
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
         
     if request.method == 'POST':
+        # ESCUDO DE PROTECCIÓN BACKEND: Si es un usuario visor, bloqueamos el intento de guardado
+        if role != 'admin':
+            return redirect(url_for('index'))
+            
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
         monto = request.form.get('monto_boleta')
@@ -99,13 +116,13 @@ def index():
             if fecha_objeto <= ultimo_registro.fecha:
                 error_validacion = f"⚠️ Error: La fecha seleccionada ({fecha_objeto.strftime('%d/%m/%Y')}) debe ser posterior a la del último registro guardado ({ultimo_registro.fecha.strftime('%d/%m/%Y')})."
                 historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
                 
             # 2. Validación de Lecturas
             if lectura_actual_p1 < ultimo_registro.lectura_p1 or lectura_actual_p2 < ultimo_registro.lectura_p2:
                 error_validacion = f"⚠️ Error: Las lecturas ingresadas no pueden ser menores al último registro guardado (Erick: {ultimo_registro.lectura_p1} kWh / Esteban: {ultimo_registro.lectura_p2} kWh)."
                 historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
 
         cons_p1, cons_p2 = 0.0, 0.0
         pct_p1, pct_p2 = 0.0, 0.0
@@ -138,13 +155,18 @@ def index():
         return redirect(url_for('index'))
     
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role)
 
 # RUTA: ELIMINAR REGISTROS PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
         return redirect(url_for('login'))
+        
+    # ESCUDO DE PROTECCIÓN BACKEND: Si no es admin, no puede eliminar
+    if session.get('role') != 'admin':
+        return redirect(url_for('index'))
+        
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
