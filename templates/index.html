@@ -64,10 +64,12 @@
                     <div><strong>Consumo Esteban:</strong> <span id="p_cons2">0</span> kWh</div>
                     <div><strong>Porcentaje Erick:</strong> <span id="p_pct1">0</span>%</div>
                     <div><strong>Porcentaje Esteban:</strong> <span id="p_pct2">0</span>%</div>
-                    <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed #border; padding-top: 5px;">
+                    <div style="grid-column: span 2; margin-top: 5px; border-top: 1px dashed var(--border); padding-top: 5px;">
                         <strong>A Pagar Erick:</strong> $<span id="p_pago1">0</span>
                     </div>
-                    <div><strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span></div>
+                    <div style="grid-column: span 2;">
+                        <strong>A Pagar Esteban:</strong> $<span id="p_pago2">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -107,7 +109,6 @@
                             <strong>Esteban:</strong> ${{ "{:,.0f}".format(reg.pago_p2) }}
                         </td>
                         <td>
-                            <!-- FORMULARIO ELIMINAR -->
                             <form action="{{ url_for('eliminar', id=reg.id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
                                 <button type="submit" class="btn-delete">Eliminar</button>
                             </form>
@@ -123,7 +124,7 @@
 <script>
     document.getElementById('fecha_lectura').valueAsDate = new Date();
 
-    // Leemos de forma segura el último registro individual enviado desde Flask
+    // Capturamos el último registro real individual enviado desde Flask
     const ult_p1 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %}");
     const ult_p2 = parseFloat("{% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %}");
 
@@ -131,7 +132,6 @@
         const inputP1 = parseFloat(document.getElementById('valor_p1').value) || 0;
         const inputP2 = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto = parseFloat(document.getElementById('monto_boleta').value) || 0;
-
 
         if(inputP1 <= 0 || inputP2 <= 0) {
             alert("Ingresa valores válidos.");
@@ -168,3 +168,4 @@
 </script>
 </body>
 </html>
+
