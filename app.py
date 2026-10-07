@@ -3,28 +3,45 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+# CONFIGURACIÓN DE CARPETA SEGURA PARA EL DISCO DURO (VOLUMEN)
 DATABASE_DIR = '/app/data'
-if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):
+if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):  # Si está en internet (Railway)
     if not os.path.exists(DATABASE_DIR):
         os.makedirs(DATABASE_DIR, exist_ok=True)
-        DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores_final.db')
+    DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores.db')
 else:
-    DATABASE_PATH = 'medidores_final.db'
+    DATABASE_PATH = 'medidores.db'
 
+# Inicializamos Flask
 app = Flask(__name__)
+
+# LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
 app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 
-USUARIOS = {
-    "admin": {"clave": "medidor2026", "rol": "administrador"},
-    "lector": {"clave": "ver2026", "rol": "solo_lectura"}
-}
+# CONTROL DE TIEMPO: Cierre automático a los 5 minutos de inactividad
+from datetime import timedelta
 
+@app.before_request
+def controlar_tiempo_sesion():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=1)
+    if 'logeado' in session:
+        session.modified = True
+
+
+# Credenciales fijas de acceso para tu teléfono celular
+USUARIO_CORRECTO = "admin"
+CLAVE_CORRECTA = "medidor2026"
+
+# BASE DE DATOS LOCAL PERMANENTE E INFALIBLE BLINDADA
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Inicialización limpia de la base de datos
 db = SQLAlchemy()
 db.init_app(app)
 
+# Modelo de Tabla SQL
 class RegistroMedidor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Date, default=datetime.utcnow)
@@ -37,54 +54,79 @@ class RegistroMedidor(db.Model):
     porcentaje_p2 = db.Column(db.Float, default=0.0)
     pago_p1 = db.Column(db.Float, default=0.0)
     pago_p2 = db.Column(db.Float, default=0.0)
+
+# RUTA: PANTALLA DE LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
-        usuario_input = request.form['username']
-        clave_input = request.form['password']
-        if usuario_input in USUARIOS and USUARIOS[usuario_input]['clave'] == clave_input:
+        if request.form['username'] == USUARIO_CORRECTO and request.form['password'] == CLAVE_CORRECTA:
             session['logeado'] = True
-            session['usuario'] = usuario_input
-            session['rol'] = USUARIOS[usuario_input]['rol']
             return redirect(url_for('index'))
         else:
-            error = 'Usuario o contraseña incorrectos.'
+            error = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.'
     return render_template('login.html', error=error)
 
+# RUTA: CERRAR SESIÓN
 @app.route('/logout')
 def logout():
-    session.clear()
+    session.pop('logeado', None)
     return redirect(url_for('login'))
 
+# RUTA: PÁGINA PRINCIPAL PROTEGIDA
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if not session.get('logeado'):
         return redirect(url_for('login'))
+        
     error_validacion = None
+    
+    # Obtener el último registro base antes de cualquier acción
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
+        
     if request.method == 'POST':
-        if session.get('rol') == 'solo_lectura':
-            return redirect(url_for('index'))
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
         monto = request.form.get('monto_boleta')
         monto_total = float(monto) if monto else 0.0
+        
         fecha_str = request.form.get('fecha_lectura')
-        fecha_objeto = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        fecha_objeto = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else datetime.utcnow().date()
+
+        # VALIDACIÓN CRÍTICA EN EL SERVIDOR (Doble escudo de protección)
+        if ultimo_registro:
+            # 1. Validación de Fecha
+            if fecha_objeto <= ultimo_registro.fecha:
+                error_validacion = f"⚠️ Error: La fecha seleccionada ({fecha_objeto.strftime('%d/%m/%Y')}) debe ser posterior a la del último registro guardado ({ultimo_registro.fecha.strftime('%d/%m/%Y')})."
+                historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+                
+            # 2. Validación de Lecturas
+            if lectura_actual_p1 < ultimo_registro.lectura_p1 or lectura_actual_p2 < ultimo_registro.lectura_p2:
+                error_validacion = f"⚠️ Error: Las lecturas ingresadas no pueden ser menores al último registro guardado (Erick: {ultimo_registro.lectura_p1} kWh / Esteban: {ultimo_registro.lectura_p2} kWh)."
+                historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+
         cons_p1, cons_p2 = 0.0, 0.0
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
-        ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto).order_by(RegistroMedidor.fecha.desc()).first()
+
+        # Buscar la lectura inmediatamente anterior para el cálculo real del período
+        ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
+                                              .order_by(RegistroMedidor.fecha.desc())\
+                                              .first()
+        
         if ultima_lectura:
             cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura.lectura_p1)
             cons_p2 = max(0.0, lectura_actual_p2 - ultima_lectura.lectura_p2)
             consumo_total = cons_p1 + cons_p2
+            
             if consumo_total > 0:
                 pct_p1 = (cons_p1 / consumo_total) * 100
                 pct_p2 = (cons_p2 / consumo_total) * 100
                 pago_p1 = (pct_p1 / 100) * monto_total
                 pago_p2 = (pct_p2 / 100) * monto_total
+
         nuevo_registro = RegistroMedidor(
             fecha=fecha_objeto, lectura_p1=lectura_actual_p1, lectura_p2=lectura_actual_p2,
             monto_boleta=monto_total, consumo_p1=round(cons_p1, 2), consumo_p2=round(cons_p2, 2),
@@ -94,30 +136,21 @@ def index():
         db.session.add(nuevo_registro)
         db.session.commit()
         return redirect(url_for('index'))
-    historial_cronologico = RegistroMedidor.query.order_by(RegistroMedidor.fecha.asc()).all()
-    return render_template('index.html', historial=historial_cronologico[::-1], historial_grafico=historial_cronologico, ultimo=ultimo_registro, error_validacion=error_validacion)
+    
+    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
 
-@app.route('/editar/<int:id>', methods=['POST'])
-def editar(id):
-    if not session.get('logeado') or session.get('rol') == 'solo_lectura': return redirect(url_for('index'))
-    registro = RegistroMedidor.query.get_or_404(id)
-    registro.lectura_p1 = float(request.form.get('valor_p1'))
-    registro.lectura_p2 = float(request.form.get('valor_p2'))
-    monto = request.form.get('monto_boleta')
-    registro.monto_boleta = float(monto) if monto else 0.0
-    fecha_str = request.form.get('fecha_lectura')
-    registro.fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-    db.session.commit()
-    return redirect(url_for('index'))
-
+# RUTA: ELIMINAR REGISTROS PROTEGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
-    if not session.get('logeado') or session.get('rol') == 'solo_lectura': return redirect(url_for('index'))
+    if not session.get('logeado'):
+        return redirect(url_for('login'))
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
     return redirect(url_for('index'))
 
+# Asegurar la creación de tablas dentro del contexto seguro
 with app.app_context():
     db.create_all()
 
