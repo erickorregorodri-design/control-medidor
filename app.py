@@ -152,9 +152,7 @@ def index():
         )
         db.session.add(nuevo_registro)
         db.session.commit()
-        return redirect(url_for('index'))
-        import datetime
-        fecha_hoy = datetime.date.today().strftime('%Y-%m-%d')
+        fecha_hoy = datetime.now().strftime('%Y-%m-%d')
         historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
         return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
