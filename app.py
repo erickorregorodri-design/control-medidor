@@ -4,6 +4,7 @@ from psycopg2.extras import DictCursor
 from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
 
+# Instanciamos la aplicación de Flask de forma limpia
 app = Flask(__name__)
 
 # LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
@@ -13,12 +14,16 @@ app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONEXIÓN DIRECTA NATIVA A SUPABASE (Dirección oficial directa sin pooler para psycopg2)
-DATABASE_URL = 'postgresql://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@db.eczhbmjltaropyzagdww.supabase.co:5432/postgres'
-
+# CONEXIÓN DIRECTA ORDENADA A SUPABASE (Evita errores por caracteres especiales en la clave)
 def get_db_connection():
-    # Conexión pura que no valida variables de entorno ocultas
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=DictCursor)
+    conn = psycopg2.connect(
+        host="db.eczhbmjltaropyzagdww.supabase.co",
+        database="postgres",
+        user="postgres.eczhbmjltaropyzagdww",
+        password="kx?EQ-65D+vcqYV",  # Tu clave pura escrita directamente
+        port="5432",
+        cursor_factory=DictCursor
+    )
     return conn
 
 # CREACIÓN AUTOMÁTICA DE LA TABLA SI NO EXISTE
@@ -84,7 +89,7 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # BUSCAR EL REGISTRO ANTERIOR REAL
+        # BUSCAR EL REGISTRO ANTERIOR REAL EN LA TABLA
         cur.execute('SELECT lectura_p1, lectura_p2 FROM registro_medidor WHERE fecha < %s ORDER BY fecha DESC LIMIT 1', (fecha_objeto,))
         ultima_lectura = cur.fetchone()
         
@@ -99,7 +104,7 @@ def index():
                 pago_p1 = (pct_p1 / 100) * monto_total
                 pago_p2 = (pct_p2 / 100) * monto_total
 
-        # GUARDAR EN LA BASE DE DATOS SQL
+        # GUARDAR LOS CÁLCULOS NETOS EN LA BASE DE DATOS SQL
         cur.execute('''
             INSERT INTO registro_medidor (fecha, lectura_p1, lectura_p2, monto_boleta, consumo_p1, consumo_p2, porcentaje_p1, porcentaje_p2, pago_p1, pago_p2)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -110,10 +115,11 @@ def index():
         conn.close()
         return redirect(url_for('index'))
     
-    # OBTENER HISTORIAL Y ÚLTIMO REGISTRO
+    # OBTENER HISTORIAL COMPLETAMENTE ACTUALIZADO
     cur.execute('SELECT * FROM registro_medidor ORDER BY fecha DESC')
     historial = cur.fetchall()
     
+    # OBTENER EL ÚLTIMO REGISTRO BASE DE FORMA INDEPENDIENTE PARA EL JS DE PREVISUALIZACIÓN
     cur.execute('SELECT lectura_p1, lectura_p2 FROM registro_medidor ORDER BY fecha DESC LIMIT 1')
     ultimo_registro = cur.fetchone()
     
@@ -134,7 +140,7 @@ def eliminar(id):
     conn.close()
     return redirect(url_for('index'))
 
-# Inicializar la tabla antes de arrancar
+# Inicializar la tabla SQL antes de que el servidor web empiece a escuchar peticiones
 init_db()
 
 if __name__ == '__main__':
