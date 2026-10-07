@@ -48,7 +48,7 @@ db.init_app(app)
 class RegistroMedidor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Date, default=datetime.utcnow)
-    lectura_p1 = db.Column(db.Float, nullable=False)1
+    lectura_p1 = db.Column(db.Float, nullable=False)
     lectura_p2 = db.Column(db.Float, nullable=False)
     monto_boleta = db.Column(db.Float, nullable=True)
     consumo_p1 = db.Column(db.Float, default=0.0)
