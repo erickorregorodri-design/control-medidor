@@ -1,53 +1,40 @@
 import os
-import psycopg2
-from psycopg2.extras import DictCursor
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-# Instanciamos la aplicación de Flask de forma limpia
+# Inicializamos Flask
 app = Flask(__name__)
 
 # LLAVE SECRETA: Clave para encriptar las sesiones de usuario de forma segura
 app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 
-# Credenciales fijas de acceso (Usuario y contraseña para tu celular)
+# Credenciales fijas de acceso para tu teléfono celular
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONEXIÓN DIRECTA ORDENADA A SUPABASE (Evita errores por caracteres especiales en la clave)
-def get_db_connection():
-    conn = psycopg2.connect(
-        host="db.eczhbmjltaropyzagdww.supabase.co",
-        database="postgres",
-        user="postgres.eczhbmjltaropyzagdww",
-        password="kx?EQ-65D+vcqYV",  # Tu clave pura escrita directamente
-        port="5432",
-        cursor_factory=DictCursor
-    )
-    return conn
+# BASE DE DATOS LOCAL PERMANENTE E INFALIBLE
+# Al usar SQLite local dentro de Railway, eliminamos para siempre los errores de red y puertos
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# CREACIÓN AUTOMÁTICA DE LA TABLA SI NO EXISTE
-def init_db():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS registro_medidor (
-            id SERIAL PRIMARY KEY,
-            fecha DATE NOT NULL,
-            lectura_p1 REAL NOT NULL,
-            lectura_p2 REAL NOT NULL,
-            monto_boleta REAL,
-            consumo_p1 REAL DEFAULT 0.0,
-            consumo_p2 REAL DEFAULT 0.0,
-            porcentaje_p1 REAL DEFAULT 0.0,
-            porcentaje_p2 REAL DEFAULT 0.0,
-            pago_p1 REAL DEFAULT 0.0,
-            pago_p2 REAL DEFAULT 0.0
-        );
-    ''')
-    conn.commit()
-    cur.close()
-    conn.close()
+# Inicialización limpia de la base de datos
+db = SQLAlchemy()
+db.init_app(app)
+
+# Modelo de Tabla SQL
+class RegistroMedidor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.Date, default=datetime.utcnow)
+    lectura_p1 = db.Column(db.Float, nullable=False)
+    lectura_p2 = db.Column(db.Float, nullable=False)
+    monto_boleta = db.Column(db.Float, nullable=True)
+    consumo_p1 = db.Column(db.Float, default=0.0)
+    consumo_p2 = db.Column(db.Float, default=0.0)
+    porcentaje_p1 = db.Column(db.Float, default=0.0)
+    porcentaje_p2 = db.Column(db.Float, default=0.0)
+    pago_p1 = db.Column(db.Float, default=0.0)
+    pago_p2 = db.Column(db.Float, default=0.0)
 
 # RUTA: PANTALLA DE LOGIN
 @app.route('/login', methods=['GET', 'POST'])
@@ -73,9 +60,6 @@ def index():
     if not session.get('logeado'):
         return redirect(url_for('login'))
         
-    conn = get_db_connection()
-    cur = conn.cursor()
-
     if request.method == 'POST':
         lectura_actual_p1 = float(request.form.get('valor_p1'))
         lectura_actual_p2 = float(request.form.get('valor_p2'))
@@ -89,13 +73,14 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # BUSCAR EL REGISTRO ANTERIOR REAL EN LA TABLA
-        cur.execute('SELECT lectura_p1, lectura_p2 FROM registro_medidor WHERE fecha < %s ORDER BY fecha DESC LIMIT 1', (fecha_objeto,))
-        ultima_lectura = cur.fetchone()
+        # Buscar la lectura inmediatamente anterior en la base de datos
+        ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
+                                              .order_by(RegistroMedidor.fecha.desc())\
+                                              .first()
         
         if ultima_lectura:
-            cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura['lectura_p1'])
-            cons_p2 = max(0.0, lectura_actual_p2 - ultima_lectura['lectura_p2'])
+            cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura.lectura_p1)
+            cons_p2 = max(0.0, lectura_actual_p2 - ultima_lectura.lectura_p2)
             consumo_total = cons_p1 + cons_p2
             
             if consumo_total > 0:
@@ -104,27 +89,18 @@ def index():
                 pago_p1 = (pct_p1 / 100) * monto_total
                 pago_p2 = (pct_p2 / 100) * monto_total
 
-        # GUARDAR LOS CÁLCULOS NETOS EN LA BASE DE DATOS SQL
-        cur.execute('''
-            INSERT INTO registro_medidor (fecha, lectura_p1, lectura_p2, monto_boleta, consumo_p1, consumo_p2, porcentaje_p1, porcentaje_p2, pago_p1, pago_p2)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (fecha_objeto, lectura_actual_p1, lectura_actual_p2, monto_total, round(cons_p1, 2), round(cons_p2, 2), round(pct_p1, 1), round(pct_p2, 1), round(pago_p1, 0), round(pago_p2, 0)))
-        
-        conn.commit()
-        cur.close()
-        conn.close()
+        nuevo_registro = RegistroMedidor(
+            fecha=fecha_objeto, lectura_p1=lectura_actual_p1, lectura_p2=lectura_actual_p2,
+            monto_boleta=monto_total, consumo_p1=round(cons_p1, 2), consumo_p2=round(cons_p2, 2),
+            porcentaje_p1=round(pct_p1, 1), porcentaje_p2=round(pct_p2, 1),
+            pago_p1=round(pago_p1, 0), pago_p2=round(pago_p2, 0)
+        )
+        db.session.add(nuevo_registro)
+        db.session.commit()
         return redirect(url_for('index'))
     
-    # OBTENER HISTORIAL COMPLETAMENTE ACTUALIZADO
-    cur.execute('SELECT * FROM registro_medidor ORDER BY fecha DESC')
-    historial = cur.fetchall()
-    
-    # OBTENER EL ÚLTIMO REGISTRO BASE DE FORMA INDEPENDIENTE PARA EL JS DE PREVISUALIZACIÓN
-    cur.execute('SELECT lectura_p1, lectura_p2 FROM registro_medidor ORDER BY fecha DESC LIMIT 1')
-    ultimo_registro = cur.fetchone()
-    
-    cur.close()
-    conn.close()
+    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
     return render_template('index.html', historial=historial, ultimo=ultimo_registro)
 
 # RUTA: ELIMINAR REGISTROS PROTEGIDA
@@ -132,16 +108,15 @@ def index():
 def eliminar(id):
     if not session.get('logeado'):
         return redirect(url_for('login'))
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('DELETE FROM registro_medidor WHERE id = %s', (id,))
-    conn.commit()
-    cur.close()
-    conn.close()
+    registro = RegistroMedidor.query.get_or_404(id)
+    db.session.delete(registro)
+    db.session.commit()
     return redirect(url_for('index'))
 
-# Inicializar la tabla SQL antes de que el servidor web empiece a escuchar peticiones
-init_db()
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True, port=8080)
+else:
+    with app.app_context():
+        db.create_all()
