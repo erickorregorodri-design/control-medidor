@@ -80,8 +80,14 @@ def index():
         db.session.commit()
         return redirect(url_for('index'))
     
+        # Obtener el historial completo
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    return render_template('index.html', historial=historial)
+    
+    # Obtener estrictamente el último registro guardado (si existe) para el cálculo en JS
+    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
+    
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro)
+
 
 # NUEVA RUTA PARA ELIMINAR REGISTROS
 @app.route('/eliminar/<int:id>', methods=['POST'])
