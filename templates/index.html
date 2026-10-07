@@ -80,6 +80,12 @@
 <div class="container">
     <div class="card">
         <div class="logout-container">
+                    <!-- Barra de Seguridad con Reloj Visible -->
+        <div style="background-color: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-left: 4px solid var(--danger);">
+            <span style="font-size: 12px; font-weight: bold; color: #475569;">🔒 Seguridad</span>
+            <span style="font-size: 14px; font-weight: bold; color: var(--danger);" id="reloj_pantalla">05:00</span>
+        </div>
+
             <a href="/logout" class="logout-link">🔒 Cerrar Sesión</a>
         </div>
         <h2>⚡ Registro de Medidor</h2>
@@ -246,6 +252,53 @@
         btnGuardar.style.opacity = "1";
         btnGuardar.style.cursor = "pointer";
     }
+        // MOTOR DEL TEMPORIZADOR VISUAL (5 MINUTOS)
+    let tiempoRestante = 300; 
+    let intervaloReloj;
+    let relojInactividad;
+
+    function actualizarRelojVisual() {
+        let minutos = Math.floor(tiempoRestante / 60);
+        let segundos = tiempoRestante % 60;
+        
+        segundos = segundos < 10 ? '0' + segundos : segundos;
+        minutos = minutos < 10 ? '0' + minutos : minutes;
+        
+        const elemReloj = document.getElementById('reloj_pantalla');
+        if (elemReloj) {
+            elemReloj.innerText = `${minutos}:${segundos}`;
+        }
+        
+        if (tiempoRestante <= 0) {
+            clearInterval(intervaloReloj);
+            window.location.href = "/logout";
+        }
+        tiempoRestante--;
+    }
+
+    function resetearReloj() {
+        clearTimeout(relojInactividad);
+        clearInterval(intervaloReloj);
+        
+        tiempoRestante = 300;
+        const elemReloj = document.getElementById('reloj_pantalla');
+        if (elemReloj) {
+            elemReloj.innerText = "05:00";
+        }
+        
+        intervaloReloj = setInterval(actualizarRelojVisual, 1000);
+        
+        relojInactividad = setTimeout(function() {
+            window.location.href = "/logout";
+        }, 300000);
+    }
+
+    window.onload = resetearReloj;
+    document.onmousemove = resetearReloj;
+    document.onkeypress = resetearReloj;
+    document.ontouchstart = resetearReloj;
+    document.onscroll = resetearReloj;
+
 </script>
 </body>
 </html>
