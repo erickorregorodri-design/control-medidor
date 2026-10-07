@@ -204,7 +204,7 @@
             return;
         }
 
-                // 1. ESCUDO DE FECHA
+        // 1. ESCUDO DE FECHA
         if (ult_fecha && inputFecha <= ult_fecha) {
             alert("⚠️ Fecha incorrecta");
             return;
@@ -219,4 +219,34 @@
             alert("⚠️ Lectura Esteban menor");
             return;
         }
+
+        let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
+        let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
+        let totalCons = cons1 + cons2;
+
+        let pct1 = 0, pct2 = 0, pago1 = 0, pago2 = 0;
+
+        if (totalCons > 0) {
+            pct1 = (cons1 / totalCons) * 100;
+            pct2 = (cons2 / totalCons) * 100;
+            pago1 = (pct1 / 100) * monto;
+            pago2 = (pct2 / 100) * monto;
+        }
+
+        document.getElementById('p_cons1').innerText = cons1.toFixed(1);
+        document.getElementById('p_cons2').innerText = cons2.toFixed(1);
+        document.getElementById('p_pct1').innerText = pct1.toFixed(1);
+        document.getElementById('p_pct2').innerText = pct2.toFixed(1);
+        document.getElementById('p_pago1').innerText = Math.round(pago1).toLocaleString('es-CL');
+        document.getElementById('p_pago2').innerText = Math.round(pago2).toLocaleString('es-CL');
+
+        document.getElementById('previewBox').style.display = 'block';
+        const btnGuardar = document.getElementById('btnGuardar');
+        btnGuardar.disabled = false;
+        btnGuardar.style.opacity = "1";
+        btnGuardar.style.cursor = "pointer";
+    }
+</script>
+</body>
+</html>
 
