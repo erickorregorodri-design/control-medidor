@@ -3,6 +3,16 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+# CONFIGURACIÓN DE CARPETA SEGURA PARA EL DISCO DURO (VOLUMEN)
+# Obligamos a Python a verificar y crear la ruta del disco duro antes de arrancar la app
+DATABASE_DIR = '/app/data'
+if os.environ.get('PORT') or os.environ.get('DATABASE_URL'):  # Si está en internet
+    if not os.path.exists(DATABASE_DIR):
+        os.makedirs(DATABASE_DIR, exist_ok=True)
+    DATABASE_PATH = os.path.join(DATABASE_DIR, 'medidores.db')
+else:
+    DATABASE_PATH = 'medidores.db'
+
 # Inicializamos Flask
 app = Flask(__name__)
 
@@ -13,9 +23,8 @@ app.secret_key = 'mi_llave_secreta_super_segura_medidores_2026'
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# BASE DE DATOS LOCAL PERMANENTE E INFALIBLE
-# Al usar SQLite local dentro de Railway, eliminamos para siempre los errores de red y puertos
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
+# BASE DE DATOS LOCAL PERMANENTE E INFALIBLE BLINDADA
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicialización limpia de la base de datos
@@ -74,9 +83,10 @@ def index():
         pago_p1, pago_p2 = 0.0, 0.0
 
         # Buscar la lectura inmediatamente anterior en la base de datos
-        ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
-                                              .order_by(RegistroMedidor.fecha.desc())\
-                                              .first()
+        with app.app_context():
+            ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
+                                                  .order_by(RegistroMedidor.fecha.desc())\
+                                                  .first()
         
         if ultima_lectura:
             cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura.lectura_p1)
@@ -113,10 +123,9 @@ def eliminar(id):
     db.session.commit()
     return redirect(url_for('index'))
 
+# Asegurar la creación de tablas dentro del contexto seguro
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, port=8080)
-else:
-    with app.app_context():
-        db.create_all()
