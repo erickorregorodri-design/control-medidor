@@ -59,7 +59,6 @@ def index():
                                               .first()
         
         if ultima_lectura:
-            # Resta estricta sobre el consumo anterior real
             cons_p1 = max(0.0, lectura_actual_p1 - ultima_lectura.lectura_p1)
             cons_p2 = max(0.0, lectura_actual_p2 - ultima_lectura.lectura_p2)
             consumo_total = cons_p1 + cons_p2
@@ -80,19 +79,16 @@ def index():
         db.session.commit()
         return redirect(url_for('index'))
     
-        # Obtener el historial completo
+    # Se obtienen los datos de forma correcta
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    
-    # Obtener estrictamente el último registro guardado (si existe) para el cálculo en JS
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
     
     return render_template('index.html', historial=historial, ultimo=ultimo_registro)
 
-
-# NUEVA RUTA PARA ELIMINAR REGISTROS
+# NUEVA RUTA PARA ELIMINAR REGISTROS CORREGIDA
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
-    registro = RegistroMedidor.query.get_or_400(id)
+    registro = RegistroMedidor.query.get_or_404(id)  # <--- Corregido a get_or_404
     db.session.delete(registro)
     db.session.commit()
     return redirect(url_for('index'))
