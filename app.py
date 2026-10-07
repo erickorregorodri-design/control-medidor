@@ -24,7 +24,7 @@ from datetime import timedelta
 @app.before_request
 def controlar_tiempo_sesion():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=1)
     if 'logeado' in session:
         session.modified = True
 
