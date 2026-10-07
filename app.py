@@ -43,7 +43,9 @@ class RegistroMedidor(db.Model):
     pago_p2 = db.Column(db.Float, default=0.0)
 
 @app.route('/', methods=['GET', 'POST'])
-def index():  # <--- Agregamos la función correctamente alineada
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    db.create_all()  # <--- AGREGA ESTA LÍNEA AQUÍ MISMO (asegúrate de darle 4 espacios a la derecha)
     if request.method == 'POST':
         # 1. Capturar datos del formulario HTML
         lectura_actual_p1 = float(request.form.get('valor_p1'))
