@@ -82,9 +82,15 @@ def index():
         fecha_str = request.form.get('fecha_lectura')
         fecha_objeto = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else datetime.utcnow().date()
 
-        # VALIDACIÓN CRÍTICA EN EL SERVIDOR:
-        # Si ya existen registros, las nuevas lecturas no pueden ser menores a las anteriores
+        # VALIDACIÓN CRÍTICA EN EL SERVIDOR (Doble escudo de protección)
         if ultimo_registro:
+            # 1. Validación de Fecha
+            if fecha_objeto <= ultimo_registro.fecha:
+                error_validacion = f"⚠️ Error: La fecha seleccionada ({fecha_objeto.strftime('%d/%m/%Y')}) debe ser posterior a la del último registro guardado ({ultimo_registro.fecha.strftime('%d/%m/%Y')})."
+                historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+                return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion)
+                
+            # 2. Validación de Lecturas
             if lectura_actual_p1 < ultimo_registro.lectura_p1 or lectura_actual_p2 < ultimo_registro.lectura_p2:
                 error_validacion = f"⚠️ Error: Las lecturas ingresadas no pueden ser menores al último registro guardado (Erick: {ultimo_registro.lectura_p1} kWh / Esteban: {ultimo_registro.lectura_p2} kWh)."
                 historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
@@ -94,7 +100,7 @@ def index():
         pct_p1, pct_p2 = 0.0, 0.0
         pago_p1, pago_p2 = 0.0, 0.0
 
-        # Buscar la lectura inmediatamente anterior para el cálculo
+        # Buscar la lectura inmediatamente anterior para el cálculo real del período
         ultima_lectura = RegistroMedidor.query.filter(RegistroMedidor.fecha < fecha_objeto)\
                                               .order_by(RegistroMedidor.fecha.desc())\
                                               .first()
