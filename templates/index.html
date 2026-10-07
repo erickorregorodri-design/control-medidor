@@ -208,37 +208,16 @@
         if (ult_fecha && inputFecha <= ult_fecha) {
             const fPartes = ult_fecha.split('-');
             const fFormateada = `${fPartes[2]}/${fPartes[1]}/${fPartes[0]}`;
-alert(⚠️ Atención: La fecha seleccionada debe ser posterior al último corte guardado (${fFormateada}).);
-return;
-}
-// 2. ESCUDO DE LECTURAS
-if (ult_p1 > 0 && inputP1 < ult_p1) {
-alert(⚠️ Atención Erick: Tu lectura ingresada (${inputP1} kWh) es MENOR a la última guardada (${ult_p1} kWh). Por favor verifícala.);
-return;
-}
-if (ult_p2 > 0 && inputP2 < ult_p2) {
-alert(⚠️ Atención Esteban: Tu lectura ingresada (${inputP2} kWh) es MENOR a la última guardada (${ult_p2} kWh). Por favor verifícala.);
-return;
-}
-let cons1 = ult_p1 > 0 ? Math.max(0, inputP1 - ult_p1) : 0;
-let cons2 = ult_p2 > 0 ? Math.max(0, inputP2 - ult_p2) : 0;
-let totalCons = cons1 + cons2;
-let pct1 = 0, pct2 = 0, pago1 = 0, pago2 = 0;
-if (totalCons > 0) {
-pct1 = (cons1 / totalCons) * 100;
-pct2 = (cons2 / totalCons) * 100;
-pago1 = (pct1 / 100) * monto;
-pago2 = (pct2 / 100) * monto;
-}
-document.getElementById('p_cons1').innerText = cons1.toFixed(1);
-document.getElementById('p_cons2').innerText = cons2.toFixed(1);
-document.getElementById('p_pct1').innerText = pct1.toFixed(1);
-document.getElementById('p_pct2').innerText = pct2.toFixed(1);
-document.getElementById('p_pago1').innerText = Math.round(pago1).toLocaleString('es-CL');
-document.getElementById('p_pago2').innerText = Math.round(pago2).toLocaleString('es-CL');
-document.getElementById('previewBox').style.display = 'block';
-const btnGuardar = document.getElementById('btnGuardar');
-btnGuardar.disabled = false;
-btnGuardar.style.opacity = "1";
-btnGuardar.style.cursor = "pointer";
-}
+        alert("⚠️ Atención: La fecha seleccionada debe ser posterior al último corte.");
+        return;
+    }
+
+    // 2. ESCUDO DE LECTURAS
+    if (ult_p1 > 0 && inputP1 < ult_p1) {
+        alert("⚠️ Atención Erick: Tu lectura ingresada es MENOR a la última guardada.");
+        return;
+    }
+    if (ult_p2 > 0 && inputP2 < ult_p2) {
+        alert("⚠️ Atención Esteban: Tu lectura ingresada es MENOR a la última guardada.");
+        return;
+    }
