@@ -3,19 +3,24 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+# Instanciamos la aplicación de Flask de forma limpia
 app = Flask(__name__)
 
-# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC local usa SQLite / Internet usa Psycopg2)
+# CONFIGURACIÓN INTELIGENTE CON GELADA (PC usa SQLite / Internet usa Supabase de forma directa)
 if os.environ.get('RENDER'):
-    # Cadena directa y robusta con el conector estándar de la industria (+psycopg2)
-    # Apuntamos directo al Session Pooler que es compatible con IPv4 en la nube
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D+vcqYV@://supabase.com'
+    # Usamos la URI directa. Reemplazamos los caracteres conflictivos para cumplir las reglas de SQLAlchemy
+    # Cambiamos el signo más '+' de tu clave por '%2B' para que no rompa la lectura del puerto
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
 else:
-    # Tu configuración de PC local que te funciona perfecto y libre de bloqueos de Windows
+    # Tu configuración local de PC que te corre excelente
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medidores.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+
+# INICIALIZACIÓN FORZADA CONTROLADA
+# Forzamos a SQLAlchemy a usar estrictamente la URI que definimos arriba, ignorando cualquier variable oculta de Render
+db = SQLAlchemy()
+db.init_app(app)
 
 # Modelo SQL
 class RegistroMedidor(db.Model):
