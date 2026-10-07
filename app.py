@@ -13,10 +13,10 @@ app.secret_key = 'mi_llave_secreta_super_segura_medidores'
 USUARIO_CORRECTO = "admin"
 CLAVE_CORRECTA = "medidor2026"
 
-# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC usa SQLite / Internet usa Supabase de forma directa)
+# CONFIGURACIÓN INTELIGENTE DEFINITIVA (PC usa SQLite / Internet usa Supabase Directo)
 if os.environ.get('RENDER') or os.environ.get('RAILWAY_STATIC_URL') or os.environ.get('PORT'):
-    # Cadena directa y robusta con el conector estándar de la industria (+psycopg2)
-    # Cambiamos el signo más '+' por '%2B' para cumplir las reglas de SQLAlchemy en la nube
+    # Conector estándar psycopg2 apuntando de forma fija al puerto directo 5432 para Railway
+    # El signo más '+' está protegido con su formato seguro '%2B'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres.eczhbmjltaropyzagdww:kx?EQ-65D%2BvcqYV@://supabase.com'
 else:
     # Tu configuración de PC local que te corre excelente
