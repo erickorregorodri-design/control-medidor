@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ Iniciar Sesión</title>
+    <title>🔒 Acceso Privado</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #f8fafc;
+            background-color: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,40 +16,79 @@
             padding: 16px;
         }
         .login-card {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            background-color: #1e1e1e;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             text-align: center;
+            border: 1px solid #2d2d2d;
         }
-        h2 { margin-bottom: 20px; color: #1e293b; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .form-group { margin-bottom: 16px; text-align: left; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #475569; }
+        h2 { 
+            color: #ffffff; 
+            margin-bottom: 28px; 
+            font-size: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px;
+            font-weight: 600;
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+            text-align: left; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-size: 14px; 
+            color: #aeaeae; 
+            font-weight: 500;
+        }
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            padding: 14px;
+            background-color: #2a2a2a;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
             font-size: 16px;
+            color: #ffffff;
             box-sizing: border-box;
         }
-        input:focus { outline: 2px solid #2563eb; }
+        input::placeholder {
+            color: #666666;
+        }
+        input:focus { 
+            outline: none;
+            border-color: #2563eb; 
+        }
         button {
             width: 100%;
             padding: 14px;
-            background-color: #2563eb;
+            background-color: #0b4bc4;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 10px;
+            transition: background 0.2s;
         }
-        button:hover { background-color: #1d4ed8; }
-        .error { color: #dc2626; font-size: 14px; margin-bottom: 12px; font-weight: 500; background-color: #fee2e2; padding: 8px; border-radius: 4px; }
+        button:hover { 
+            background-color: #1d4ed8; 
+        }
+        .error { 
+            color: #fca5a5; 
+            font-size: 14px; 
+            margin-bottom: 16px; 
+            font-weight: 500; 
+            background-color: #7f1d1d; 
+            padding: 10px; 
+            border-radius: 6px; 
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -62,10 +101,14 @@
         
         <form action="/login" method="POST">
             <div class="form-group">
-                <label for="password">Contraseña de Seguridad</label>
-                <input type="password" id="password" name="password" placeholder="Ingresa tu clave" required>
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" placeholder="Ej: admin" required>
             </div>
-            <button type="submit">Ingresar</button>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit">Ingresar al Sistema</button>
         </form>
     </div>
 </body>
