@@ -143,15 +143,16 @@ def index():
             if consumo_total > 0:
                 pct_p1 = (cons_p1 / consumo_total) * 100
                 pct_p2 = (cons_p2 / consumo_total) * 100
-                pago_p1 = (pct_p1 / 100) * monto_total
-                pago_p2 = monto_total - round(pago_p1, 0)
+                pago_p1 = round((pct_p1 / 100) * monto_total, 0)
+                pago_p2 = monto_total - pago_p1
+
 
 
         nuevo_registro = RegistroMedidor(
             fecha=fecha_objeto, lectura_p1=lectura_actual_p1, lectura_p2=lectura_actual_p2,
             monto_boleta=monto_total, consumo_p1=round(cons_p1, 2), consumo_p2=round(cons_p2, 2),
             porcentaje_p1=round(pct_p1, 1), porcentaje_p2=round(pct_p2, 1),
-            pago_p1=round(pago_p1, 0), pago_p2=round(pago_p2, 0)
+            pago_p1=pago_p1, pago_p2=pago_p2
         )
         db.session.add(nuevo_registro)
         db.session.commit()
