@@ -167,14 +167,17 @@ def index():
 def eliminar(id):
     if not session.get('logeado'):
         return redirect(url_for('login'))
-        
-    # ESCUDO DE PROTECCIÓN BACKEND: Si no es admin, no puede eliminar
     if session.get('role') != 'admin':
         return redirect(url_for('index'))
         
+    # Orden de borrado directo a la vena de la base de datos
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
+    
+    # Redirección directa para que no recalcule nada en el backend
+    return redirect(url_for('index'))
+
     
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
