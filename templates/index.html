@@ -228,7 +228,7 @@
                     {% for reg in historial %}
                     <tr>
                         <td>{{ reg.fecha.strftime('%d/%m/%Y') }}</td>
-                        <td>{{ reg.lectura_p1 }} / {{ reg.lectura_p2 }}</td>
+                        <td>{{ reg.lectura_p1|int }} / {{ reg.lectura_p2|int }}</td>
                         <td>
                             <span class="badge">{{ reg.consumo_p1 }} kWh</span><br>
                             <span class="badge" style="background-color: rgba(22, 163, 74, 0.1); color: var(--success);">{{ reg.consumo_p2 }} kWh</span>
