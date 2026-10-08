@@ -162,7 +162,7 @@ def index():
     return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
     
-# RUTA: ELIMINAR REGISTROS PROTEGIDA
+# RUTA: ELIMINAR REGISTROS PROTEGIDA (CORREGIDA SIN CÓDIGO DUPLICADO)
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
@@ -175,16 +175,8 @@ def eliminar(id):
     db.session.delete(registro)
     db.session.commit()
     
-    # Redirección directa para que no recalcule nada en el backend
+    # Redirección directa y limpia para refrescar el sistema entero
     return redirect(url_for('index'))
-
-    
-    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
-    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
-    role = session.get('role', 'viewer')
-    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=None, role=role, fecha_hoy=fecha_hoy)
-
 
 
 # Asegurar la creación de tablas dentro del contexto seguro
