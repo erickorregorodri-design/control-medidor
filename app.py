@@ -162,7 +162,7 @@ def index():
     return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
     
-# RUTA: ELIMINAR REGISTROS PROTEGIDA (APTA PARA QUEDAR EN CERO REGISTROS)
+# RUTA: ELIMINAR REGISTROS PROTEGIDA (BLINDADA CONTRA TABLAS VACÍAS)
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
@@ -170,21 +170,21 @@ def eliminar(id):
     if session.get('role') != 'admin':
         return redirect(url_for('index'))
         
-    # 1. Buscamos y borramos el registro solicitado
+    # 1. Borramos el registro de la base de datos
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
     
-    # 2. Verificamos cuántos registros quedan vivos en la base de datos
+    # 2. Contamos cuántos quedan vivos inmediatamente
     total_registros = RegistroMedidor.query.count()
     
-    # 3. Si la tabla quedó completamente vacía, reiniciamos la vista limpia sin calcular nada
+    # 3. Si la tabla quedó en cero absoluto, renderizamos la vista vacía sin cálculos fantasma
     if total_registros == 0:
-        return redirect(url_for('index'))
+        fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+        return render_template('index.html', historial=[], ultimo=None, error_validacion=None, role='admin', fecha_hoy=fecha_hoy)
         
-    # 4. Si aún quedan registros, el sistema puede seguir su flujo normal
+    # 4. Si aún quedan otros registros, podemos refrescar de forma normal
     return redirect(url_for('index'))
-
 
 
 # Asegurar la creación de tablas dentro del contexto seguro
