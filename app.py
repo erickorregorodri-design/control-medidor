@@ -30,7 +30,7 @@ def controlar_tiempo_sesion():
 
 
 # Credenciales fijas de acceso para tu sistema
-USUARIO_ADMIN = "admin"
+USUARIO_ADMIN = "Erick"
 CLAVE_ADMIN = "medidor2026"
 
 USUARIO_LECTOR = "Karina"
