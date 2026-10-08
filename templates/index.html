@@ -93,8 +93,8 @@
         .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
         .table-responsive { overflow-x: auto; width: 100%; margin-top: 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text); }
-        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; }
-        th { background-color: var(--th-bg); color: var(--text-label); font-weight: 600; font-size: 11px; }
+        th, td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; }
+        th { background-color: var(--th-bg); color: var(--text-label); font-weight: 600; font-size: 11px; text-align: center; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: var(--bg-badge); color: var(--text-badge); display: inline-block; margin-bottom: 4px; }
                 /* ==========================================================================
            VISTA INTELIGENTE PARA COMPUTADOR (ESCRITORIO)
@@ -125,7 +125,7 @@
                 grid-column: 2;
                 grid-row: 1;
                 margin-bottom: 12px;
-                text-align: left; /* Alinea el título del historial a la izquierda en PC */
+                text-align: center; /* Alinea el título del historial a la izquierda en PC */
             }
 
             .table-responsive {
