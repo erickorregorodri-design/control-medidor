@@ -113,8 +113,7 @@
             {{ error_validacion }}
         </div>
         {% endif %}
-
-        <form method="POST" action="/guardar" id="main-form">
+        <form method="POST" action="/" id="main-form">
             <input type="hidden" id="ult_lectura_p1" value="{{ ultimo.lectura_p1 if ultimo else 0.0 }}">
             <input type="hidden" id="ult_lectura_p2" value="{{ ultimo.lectura_p2 if ultimo else 0.0 }}">
             <div class="form-group">
@@ -240,54 +239,50 @@
     // ==========================================================================
     // 2. FUNCIÓN CALCULAR CONSUMOS (PREVISUALIZACIÓN LOCAL JS)
     // ==========================================================================
-    function calcularConsumos() {
-    // 1. Lee lo que el usuario digita en la pantalla del iPhone
-    const actualP1 = parseFloat(document.getElementById('lectura_p1').value) || 0;
-    const actualP2 = parseFloat(document.getElementById('lectura_p2').value) || 0;
-    
-    // 2. Lee las últimas lecturas guardadas en la base de datos SQLite (las que pusimos ocultas)
-    const anteriorP1 = parseFloat(document.getElementById('ult_lectura_p1').value) || 0;
-    const anteriorP2 = parseFloat(document.getElementById('ult_lectura_p2').value) || 0;
-    
-    // 3. Lee el monto de la boleta limpiando los puntos de miles estilo chileno
-    const inputB = document.getElementById('monto_boleta');
-    let montoStr = inputB ? inputB.value : '0';
-    const montoTotal = parseFloat(montoStr.replace(/\./g, '')) || 0;
+        function calcularConsumos() {
+        // 1. Obtener los valores que digitó el usuario en el formulario
+        const lecturaActualEr = parseFloat(document.getElementById('lectura_p1').value) || 0;
+        const lecturaActualEs = parseFloat(document.getElementById('lectura_p2').value) || 0;
+        
+        const inputB = document.getElementById('monto_boleta');
+        let montoStr = inputB ? inputB.value : '0';
+        const montoTotal = parseFloat(montoStr.replace(/\./g, '')) || 0;
 
-    // 4. Aplica las mismas matemáticas exactas de tu archivo app.py
-    let consP1 = 0;
-    let consP2 = 0;
-    
-    if (actualP1 >= anteriorP1) consP1 = actualP1 - anteriorP1;
-    if (actualP2 >= anteriorP2) consP2 = actualP2 - anteriorP2;
-    
-    const consumoTotal = consP1 + consP2;
-    
-    let pctP1 = 0;
-    let pctP2 = 0;
-    let pagoP1 = 0;
-    let pagoP2 = 0;
-    
-    if (consumoTotal > 0) {
-        pctP1 = (consP1 / consumoTotal) * 100;
-        pctP2 = (consP2 / consumoTotal) * 100;
-        pagoP1 = (pctP1 / 100) * montoTotal;
-        pagoP2 = (pctP2 / 100) * montoTotal;
+        // 2. Traer de forma segura las últimas lecturas desde la base de datos (SQLite) usando Jinja2
+        // Si no existen registros previos, el valor base por defecto será cero
+        const lecturaAnteriorEr = parseFloat("{{ ultimo.lectura_p1 if ultimo else 0 }}") || 0;
+        const lecturaAnteriorEs = parseFloat("{{ ultimo.lectura_p2 if ultimo else 0 }}") || 0;
+
+        // 3. Ejecutar las Fórmulas Matemáticas de Luz
+        const consEr = Math.max(0, lecturaActualEr - lecturaAnteriorEr);
+        const consEs = Math.max(0, lecturaActualEs - lecturaAnteriorEs);
+        const consumoTotal = consEr + consEs;
+
+        let pctEr = 0;
+        let pctEs = 0;
+        let pagoEr = 0;
+        let pagoEs = 0;
+
+        if (consumoTotal > 0) {
+            pctEr = (consEr / consumoTotal) * 100;
+            pctEs = (consEs / consumoTotal) * 100;
+            pagoEr = (pctEr / 100) * montoTotal;
+            pagoEs = (pctEs / 100) * montoTotal;
+        }
+
+        // 4. Inyectar y Renderizar los resultados con formato chileno en la pantalla del iPhone
+        document.getElementById('p_c1').textContent = consEr.toFixed(1);
+        document.getElementById('p_c2').textContent = consEs.toFixed(1);
+        
+        document.getElementById('p_p1').textContent = pctEr.toFixed(1);
+        document.getElementById('p_p2').textContent = pctEs.toFixed(1);
+        
+        document.getElementById('p_m1').textContent = Math.round(pagoEr).toLocaleString('es-CL');
+        document.getElementById('p_m2').textContent = Math.round(pagoEs).toLocaleString('es-CL');
+
+        // Mostrar el cuadro de resumen visual
+        document.getElementById('preview-box').style.display = 'block';
     }
-
-    // 5. Muestra los resultados reales en el cuadro azul de previsualización
-    document.getElementById('p_c1').textContent = consP1.toFixed(2).replace('.', ',');
-    document.getElementById('p_c2').textContent = consP2.toFixed(2).replace('.', ',');
-    
-    document.getElementById('p_p1').textContent = pctP1.toFixed(1).replace('.', ',');
-    document.getElementById('p_p2').textContent = pctP2.toFixed(1).replace('.', ',');
-    
-    document.getElementById('p_m1').textContent = Math.round(pagoP1).toLocaleString('es-CL');
-    document.getElementById('p_m2').textContent = Math.round(pagoP2).toLocaleString('es-CL');
-
-    // Hace aparecer el cuadro de resumen en la pantalla
-    document.getElementById('preview-box').style.display = 'block';
-}
 
     // ==========================================================================
     // 3. CONTROL DE SESIÓN POR TIEMPO E INACTIVIDAD (1 Minuto)
