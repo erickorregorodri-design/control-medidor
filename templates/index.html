@@ -230,7 +230,7 @@
                         <td style="text-align: center; vertical-align: middle;">
                             {% if role == 'admin' %}
                             <form action="/eliminar/{{ reg.id }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este registro histórico?');">
-                                <button type="submit" class="btn-delete">Eliminar</button>
+                                <button type="submit" class="btn-delete" formnovalidate>Eliminar</button>
                             </form>
                             {% else %}
                             <span style="color: var(--text-label); font-size: 11px; font-weight: 500; background: var(--th-bg); padding: 4px 8px; border-radius: 4px;">🔒 Bloqueado</span>
