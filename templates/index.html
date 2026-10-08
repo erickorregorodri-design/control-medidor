@@ -99,14 +99,17 @@
                 /* ==========================================================================
            VISTA INTELIGENTE PARA COMPUTADOR (ESCRITORIO)
            ========================================================================== */
-        @media (min-width: 769px) {
+             @media (min-width: 769px) {
             body {
-                align-items: center; /* Centra la aplicación en el monitor */
-                padding: 32px;
+                display: flex !important;
+                justify-content: center !important; /* Fuerza el centrado horizontal completo en PC */
+                align-items: center !important;    /* Centra la aplicación en vertical en el monitor */
+                padding: 32px !important;
+                width: 100vw !important;
             }
-            
+
             .container {
-                width: 1000px; /* Estira el contenedor en computadores */
+                width: 1150px; /* Estira el contenedor en computadores */
                 max-width: 95vw;
                 margin: 0 auto; /* <-- AGREGA ESTA LÍNEA EXACTAMENTE AQUÍ (Centra todo en PC) */
                 display: grid;
