@@ -160,7 +160,10 @@ def index():
     # RESPUESTA GENERAL OBLIGATORIA (Fuera del POST)
     historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
     fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
+    usuario_actual = USUARIO_ADMIN if role == 'admin' else USUARIO_LECTOR
+
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy, usuario_actual=usuario_actual)
+
 
     
 # RUTA: ELIMINAR REGISTROS PROTEGIDA (BLINDADA AL 100% CONTRA ERRORES DE BASE DE DATOS VACÍA)
