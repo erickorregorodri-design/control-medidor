@@ -175,16 +175,9 @@ def eliminar(id):
     db.session.delete(registro)
     db.session.commit()
     
-    # 2. Contamos cuántos quedan vivos inmediatamente
-    total_registros = RegistroMedidor.query.count()
-    
-    # 3. Si la tabla quedó en cero absoluto, renderizamos la vista vacía sin cálculos fantasma
-    if total_registros == 0:
-        fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-        return render_template('index.html', historial=[], ultimo=None, error_validacion=None, role='admin', fecha_hoy=fecha_hoy)
-        
-    # 4. Si aún quedan otros registros, podemos refrescar de forma normal
+    # Redirección directa y limpia para refrescar el sistema entero
     return redirect(url_for('index'))
+
 
 
 # Asegurar la creación de tablas dentro del contexto seguro
