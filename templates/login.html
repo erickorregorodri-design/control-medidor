@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🔒 Acceso Privado</title>
     <style>
-        /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
+                /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
         :root {
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
@@ -19,6 +19,7 @@
             --border-card: #cbd5e1;
             --error-bg: #fee2e2;
             --error-text: #991b1b;
+            color-scheme: light; /* Agregado */
         }
 
         /* 🌙 TRADUCCIÓN AUTOMÁTICA SI EL TELÉFONO ESTÁ EN MODO OSCURO */
@@ -36,6 +37,7 @@
                 --border-card: #2d2d2d;
                 --error-bg: #7f1d1d;
                 --error-text: #fca5a5;
+                color-scheme: dark; /* Agregado */
             }
         }
 
@@ -138,6 +140,22 @@
             border-radius: 6px; 
             text-align: center;
         }
+                /* ==========================================================================
+           CENTRADO ABSOLUTO PARA COMPUTADOR (ESCRITORIO)
+           ========================================================================== */
+        @media (min-width: 769px) {
+            body {
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                min-height: 100vh !important;
+                width: 100% !important;
+            }
+            .login-card {
+                margin: auto !important;
+            }
+        }
+
     </style>
 </head>
 <body>
