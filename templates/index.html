@@ -224,8 +224,8 @@
                             Est.: {{ reg.porcentaje_p2 }}%
                         </td>
                         <td style="font-weight: 600; color: var(--text-title);">
-                            Er: \${{ "{:,.0f}".format(reg.pago_p1) }}<br>
-                            Es: \${{ "{:,.0f}".format(reg.pago_p2) }}
+                            Er: ${{ "{:,.0f}".format(reg.pago_p1).replace(',', '.') }}<br>
+                            Es: ${{ "{:,.0f}".format(reg.pago_p2).replace(',', '.') }}
                         </td>
                         <td style="text-align: center; vertical-align: middle;">
                             {% if role == 'admin' %}
