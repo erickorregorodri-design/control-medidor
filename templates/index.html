@@ -170,21 +170,21 @@
             <input type="hidden" id="ult_lectura_p2" value="{{ ultimo.lectura_p2 if ultimo else 0.0 }}">
             <div class="form-group">
                 <label>Fecha de la Lectura</label>
-                <input type="date" name="fecha_lectura" value="{{ fecha_hoy if fecha_hoy else '' }}" required>
+                <input type="date" name="fecha_lectura" value="{{ fecha_hoy if fecha_hoy else '' }}" required {% if role != 'admin' %}disabled{% endif %}>
             </div>
             <div class="form-group">
                 <label>Lectura Erick (kWh)</label>
-                <input type="number" step="any" name="valor_p1" id="lectura_p1" required>
+                <input type="number" step="any" name="valor_p1" id="lectura_p1" required {% if role != 'admin' %}disabled{% endif %}>
             </div>
 
             <div class="form-group">
                 <label>Lectura Esteban (kWh)</label>
-                <input type="number" step="any" name="valor_p2" id="lectura_p2" required>
+                <input type="number" step="any" name="valor_p2" id="lectura_p2" required {% if role != 'admin' %}disabled{% endif %}>
             </div>
 
             <div class="form-group">
                 <label>Monto Total de la Boleta ($)</label>
-                <input type="text" name="monto_boleta" id="monto_boleta" required placeholder="0">
+                <input type="text" name="monto_boleta" id="monto_boleta" required placeholder="0" {% if role != 'admin' %}disabled{% endif %}>
             </div>
 
             <div id="preview-box" class="preview-box">
