@@ -175,7 +175,13 @@ def eliminar(id):
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
-    return redirect(url_for('index'))
+    
+    historial = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).all()
+    ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
+    role = session.get('role', 'viewer')
+    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+    return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=None, role=role, fecha_hoy=fecha_hoy)
+
 
 # Asegurar la creación de tablas dentro del contexto seguro
 with app.app_context():
