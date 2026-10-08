@@ -162,7 +162,7 @@ def index():
     return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
     
-# RUTA: ELIMINAR REGISTROS PROTEGIDA (CORREGIDA SIN CÓDIGO DUPLICADO)
+# RUTA: ELIMINAR REGISTROS PROTEGIDA (APTA PARA QUEDAR EN CERO REGISTROS)
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
@@ -170,13 +170,21 @@ def eliminar(id):
     if session.get('role') != 'admin':
         return redirect(url_for('index'))
         
-    # Orden de borrado directo a la vena de la base de datos
+    # 1. Buscamos y borramos el registro solicitado
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
     
-    # Redirección directa y limpia para refrescar el sistema entero
+    # 2. Verificamos cuántos registros quedan vivos en la base de datos
+    total_registros = RegistroMedidor.query.count()
+    
+    # 3. Si la tabla quedó completamente vacía, reiniciamos la vista limpia sin calcular nada
+    if total_registros == 0:
+        return redirect(url_for('index'))
+        
+    # 4. Si aún quedan registros, el sistema puede seguir su flujo normal
     return redirect(url_for('index'))
+
 
 
 # Asegurar la creación de tablas dentro del contexto seguro
