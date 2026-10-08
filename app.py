@@ -144,7 +144,8 @@ def index():
                 pct_p1 = (cons_p1 / consumo_total) * 100
                 pct_p2 = (cons_p2 / consumo_total) * 100
                 pago_p1 = (pct_p1 / 100) * monto_total
-                pago_p2 = (pct_p2 / 100) * monto_total
+                pago_p2 = monto_total - round(pago_p1, 0)
+
 
         nuevo_registro = RegistroMedidor(
             fecha=fecha_objeto, lectura_p1=lectura_actual_p1, lectura_p2=lectura_actual_p2,
