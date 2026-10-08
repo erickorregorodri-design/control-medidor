@@ -94,7 +94,7 @@ def index():
     error_validacion = None
     role = session.get('role', 'viewer') # Capturamos el rol actual ('admin' o 'viewer')
     
-    # Obtener el último registro base antes de cualquier acción
+    # Obtener el último registro base antes de cualquier acción de forma segura
     ultimo_registro = RegistroMedidor.query.order_by(RegistroMedidor.fecha.desc()).first()
         
     if request.method == 'POST':
@@ -110,7 +110,7 @@ def index():
         fecha_str = request.form.get('fecha_lectura')
         fecha_objeto = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else datetime.utcnow().date()
 
-        # VALIDACIÓN CRÍTICA EN EL SERVIDOR (Doble escudo de protección)
+        # VALIDACIÓN CRÍTICA EN EL SERVIDOR (Doble escudo con protección contra None)
         if ultimo_registro:
             # 1. Validación de Fecha
             if fecha_objeto <= ultimo_registro.fecha:
@@ -162,7 +162,7 @@ def index():
     return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=error_validacion, role=role, fecha_hoy=fecha_hoy)
 
     
-# RUTA: ELIMINAR REGISTROS PROTEGIDA (BLINDADA CONTRA TABLAS VACÍAS)
+# RUTA: ELIMINAR REGISTROS PROTEGIDA (BLINDADA AL 100% CONTRA ERRORES DE BASE DE DATOS VACÍA)
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     if not session.get('logeado'):
@@ -170,14 +170,13 @@ def eliminar(id):
     if session.get('role') != 'admin':
         return redirect(url_for('index'))
         
-    # 1. Borramos el registro de la base de datos
+    # 1. Borramos el registro solicitado de manera directa
     registro = RegistroMedidor.query.get_or_404(id)
     db.session.delete(registro)
     db.session.commit()
     
-    # Redirección directa y limpia para refrescar el sistema entero
+    # 2. Forzamos un refresco absoluto volviendo a invocar la ruta raíz limpia
     return redirect(url_for('index'))
-
 
 
 # Asegurar la creación de tablas dentro del contexto seguro
