@@ -106,13 +106,13 @@
                 ⏱️ <span id="timer">01:00</span>
             </div>
             
-            <!-- Indicador dinámico de quién inició sesión -->
+                        <!-- Indicador 100% automático enlazado a Python -->
             <div style="font-size: 13px; font-weight: bold;">
                 👤 
                 {% if role == 'admin' %}
-                    <span class="badge" style="margin: 0; background-color: var(--bg-badge); color: var(--text-badge);">Admin</span>
+                    <span class="badge" style="margin: 0; background-color: var(--bg-badge); color: var(--text-badge);">{{ usuario_actual }}</span>
                 {% else %}
-                    <span class="badge" style="margin: 0; background-color: rgba(22, 163, 74, 0.1); color: var(--success);">Karina</span>
+                    <span class="badge" style="margin: 0; background-color: rgba(22, 163, 74, 0.1); color: var(--success);">{{ usuario_actual }}</span>
                 {% endif %}
             </div>
 
