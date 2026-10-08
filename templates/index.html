@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>⚡ Control de Medidor</title>
     <style>
-        /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
         :root { 
             --primary: #2563eb; 
             --success: #16a34a; 
@@ -20,8 +19,6 @@
             --text-badge: #0369a1;
             --th-bg: #f1f5f9;
         }
-
-        /* 🌙 ADAPTACIÓN AUTOMÁTICA INTELIGENTE (MODO OSCURO) */
         @media (prefers-color-scheme: dark) {
             :root {
                 --primary: #3b82f6; 
@@ -38,7 +35,6 @@
                 --th-bg: #334155;
             }
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
@@ -50,7 +46,6 @@
             align-items: flex-start;
             min-height: 100vh; 
             width: 100vw;
-            transition: background-color 0.2s, color 0.2s;
         }
         .container { max-width: 100%; width: 400px; display: flex; flex-direction: column; gap: 20px; }
         .card { 
@@ -60,64 +55,38 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
             width: 100%; 
             border: 1px solid var(--border);
-            transition: background-color 0.2s, border-color 0.2s;
         }
-        
         .logout-link { color: var(--danger); text-decoration: none; font-size: 14px; font-weight: bold; }
         h2 { margin-bottom: 24px; color: var(--text-title); text-align: center; font-size: 22px; }
         .form-group { margin-bottom: 18px; width: 100%; display: flex; flex-direction: column; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: var(--text-label); }
-        
         input[type="number"], input[type="date"] { 
             width: 100% !important; 
-            max-width: 100% !important;
             padding: 12px !important; 
             border: 1px solid var(--border) !important; 
             border-radius: 8px !important; 
             font-size: 16px !important;
-            box-sizing: border-box !important;
-            display: block !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
             background-color: var(--background);
             color: var(--text-title);
             text-align: center;
         }
-        
-        /* Estilo sutil para inputs bloqueados en modo visor */
-        input:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-            background-color: rgba(148, 163, 184, 0.1) !important;
-        }
-        
+        input:disabled { opacity: 0.65; background-color: rgba(148, 163, 184, 0.1) !important; }
         .alert-danger {
-            background-color: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 18px;
-            font-size: 14px;
-            font-weight: 500;
-            border-left: 4px solid var(--danger);
+            background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px;
+            margin-bottom: 18px; font-size: 14px; font-weight: 500; border-left: 4px solid var(--danger);
         }
-        
         hr { border: 0; border-top: 1px solid var(--border); margin: 24px 0; }
-        
         .btn-group { display: flex; flex-direction: column; gap: 14px; width: 100%; }
-        
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-calc { background-color: var(--primary); color: white; }
         .btn-save { background-color: var(--success); color: white; }
         .btn-delete { background-color: transparent; color: var(--danger); padding: 6px 10px; font-size: 12px; border: 1px solid var(--danger); border-radius: 4px; cursor: pointer; width: 100%; }
-        
         .preview-box { background-color: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid var(--primary); display: none; }
         .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
-        
-        .table-responsive { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+        .table-responsive { overflow-x: auto; width: 100%; margin-top: 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text); }
         th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        th { background-color: var(--th-bg); color: var(--text-label); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        th { background-color: var(--th-bg); color: var(--text-label); font-weight: 600; font-size: 11px; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background-color: var(--bg-badge); color: var(--text-badge); display: inline-block; margin-bottom: 4px; }
     </style>
 </head>
@@ -125,10 +94,10 @@
 
 <div class="container">
     <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; margin-bottom: 32px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
             <div style="background-color: rgba(220, 38, 38, 0.1); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--danger);">
-                <span style="font-size: 11px; font-weight: bold; color: var(--danger); text-transform: uppercase; letter-spacing: 0.5px;">🔒 Tiempo:</span>
-                <span style="font-size: 14px; font-weight: bold; color: var(--danger); min-width: 40px;" id="reloj_pantalla">01:00</span>
+                <span style="font-size: 11px; font-weight: bold; color: var(--danger); text-transform: uppercase;">🔒 Tiempo:</span>
+                <span style="font-size: 14px; font-weight: bold; color: var(--danger);" id="reloj_pantalla">01:00</span>
             </div>
             <a href="/logout" class="logout-link">🔒 Cerrar Sesión</a>
         </div>
@@ -139,28 +108,21 @@
         <div class="alert-danger">{{ error_validacion }}</div>
         {% endif %}
         
-        <!-- Si es visor, bloqueamos la tecla enter para evitar envíos incidentales -->
-        <form action="/" method="POST" id="medidorForm" {% if role == 'viewer' %}onkeypress="return event.keyCode != 13;"{% endif %}>
-            <!-- El fieldset desactiva interacciones automáticamente si es viewer -->
-            <fieldset {% if role == 'viewer' %} disabled style="border: none; padding: 0; margin: 0;" {% else %} style="border: none; padding: 0; margin: 0;" {% endif %}>
-                
+        <form action="/" method="POST" id="medidorForm">
+            <fieldset {% if role == 'viewer' %} disabled style="border: none;" {% else %} style="border: none;" {% endif %}>
                 <div class="form-group">
                     <label for="fecha_lectura">Fecha de la Lectura</label>
-                    <input type="date" id="fecha_lectura" name="fecha_lectura" required value="{{ fecha_hoy }}">
+                    <input type="date" id="fecha_lectura" name="fecha_lectura" required value="{{ fecha_hoy if fecha_hoy else '' }}">
                 </div>
-                
                 <div class="form-group">
                     <label for="valor_p1">Lectura Erick (kWh)</label>
                     <input type="number" step="0.01" id="valor_p1" name="valor_p1" required placeholder="0.00">
                 </div>
-                
                 <div class="form-group">
                     <label for="valor_p2">Lectura Esteban (kWh)</label>
                     <input type="number" step="0.01" id="valor_p2" name="valor_p2" required placeholder="0.00">
                 </div>
-                
                 <hr>
-                
                 <div class="form-group">
                     <label for="monto_boleta">Monto Total de la Boleta ($)</label>
                     <input type="number" step="1" id="monto_boleta" name="monto_boleta" placeholder="Ej: 45000">
@@ -184,20 +146,19 @@
 
                 <div class="btn-group">
                     <button type="button" class="btn-calc" id="btnCalcular">Calcular Consumos</button>
-                    
                     {% if role == 'admin' %}
                         <button type="submit" class="btn-save">Guardar Registro</button>
                     {% else %}
-                        <div style="text-align: center; color: var(--danger); background-color: rgba(220, 38, 38, 0.08); padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; border: 1px dashed var(--danger); margin-top: 4px;">
-                            👀 Modo Solo Lectura (Sin permisos de edición)
+                        <div style="text-align: center; color: var(--danger); background-color: rgba(220, 38, 38, 0.08); padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; border: 1px dashed var(--danger);">
+                            👀 Modo Solo Lectura
                         </div>
                     {% endif %}
                 </div>
             </fieldset>
-<!-- SECCIÓN: TABLA HISTÓRICA TOTALMENTE INTEGRADA -->
-    <div class="card" style="margin-top: 4px;">
-        <h2 style="margin-bottom: 16px; font-size: 18px; text-align: left; color: var(--text-title);">📊 Historial de Consumos</h2>
-        
+        </form>
+    </div>
+    <div class="card">
+        <h2 style="margin-bottom: 16px; font-size: 18px; text-align: left;">📊 Historial de Consumos</h2>
         <div class="table-responsive">
             <table>
                 <thead>
@@ -223,25 +184,23 @@
                             Erick: {{ reg.porcentaje_p1 }}%<br>
                             Est.: {{ reg.porcentaje_p2 }}%
                         </td>
-                        <td style="font-weight: 600; color: var(--text-title);">
-                            Er: ${{ "{:,.0f}".format(reg.pago_p1).replace(',', '.') }}<br>
-                            Es: ${{ "{:,.0f}".format(reg.pago_p2).replace(',', '.') }}
+                        <td style="font-weight: 600;">
+                            Er: \${{ "{:,.0f}".format(reg.pago_p1).replace(',', '.') if reg.pago_p1 else '0' }}<br>
+                            Es: \${{ "{:,.0f}".format(reg.pago_p2).replace(',', '.') if reg.pago_p2 else '0' }}
                         </td>
-                        <td style="text-align: center; vertical-align: middle;">
+                        <td style="text-align: center;">
                             {% if role == 'admin' %}
-                            <form action="/eliminar/{{ reg.id }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este registro histórico?');">
+                            <form action="/eliminar/{{ reg.id }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
                                 <button type="submit" class="btn-delete" formnovalidate>Eliminar</button>
                             </form>
                             {% else %}
-                            <span style="color: var(--text-label); font-size: 11px; font-weight: 500; background: var(--th-bg); padding: 4px 8px; border-radius: 4px;">🔒 Bloqueado</span>
+                            <span style="font-size: 11px; background: var(--th-bg); padding: 4px 8px; border-radius: 4px;">🔒 Bloqueado</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td os-colspan="6" style="text-align: center; padding: 20px; color: var(--text-label);">
-                            No hay registros guardados todavía.
-                        </td>
+                        <td colspan="6" style="text-align: center; padding: 20px;">No hay registros guardados todavía.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -251,19 +210,14 @@
 </div>
 
 <script>
-    // LÓGICA DE TIEMPO DEL RELOJ SUPERIOR (1 minuto exactO)
     let tiempoRestante = 60; 
     const relojNodo = document.getElementById('reloj_pantalla');
-    
     const temporizador = setInterval(() => {
         let minutos = Math.floor(tiempoRestante / 60);
         let segundos = tiempoRestante % 60;
-        
         minutos = minutos < 10 ? '0' + minutos : minutos;
         segundos = segundos < 10 ? '0' + segundos : segundos;
-        
-        relojNodo.textContent = `${minutos}:${segundos}`;
-        
+        if(relojNodo) relojNodo.textContent = `${minutos}:${segundos}`;
         if (tiempoRestante <= 0) {
             clearInterval(temporizador);
             window.location.href = '/logout';
@@ -271,23 +225,16 @@
         tiempoRestante--;
     }, 1000);
 
-    // REINICIAR EL CONTADOR AL TOCAR O HACER CLIC EN CUALQUIER PARTE (PC Y MÓVIL)
-    document.addEventListener('click', function() {
-        tiempoRestante = 60;
-    });
-    
-    document.addEventListener('touchstart', function() {
-        tiempoRestante = 60;
-    });
+    document.addEventListener('click', function() { tiempoRestante = 60; });
+    document.addEventListener('touchstart', function() { tiempoRestante = 60; });
 
-    // LÓGICA INTERACTIVA DEL BOTÓN CALCULAR
     document.getElementById('btnCalcular').addEventListener('click', function() {
         const p1_actual = parseFloat(document.getElementById('valor_p1').value) || 0;
         const p2_actual = parseFloat(document.getElementById('valor_p2').value) || 0;
         const monto_boleta = parseFloat(document.getElementById('monto_boleta').value) || 0;
         
-        const p1_anterior = {% if ultimo %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %};
-        const p2_anterior = {% if ultimo %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %};
+        const p1_anterior = {% if ultimo and ultimo.lectura_p1 %}{{ ultimo.lectura_p1 }}{% else %}0{% endif %};
+        const p2_anterior = {% if ultimo and ultimo.lectura_p2 %}{{ ultimo.lectura_p2 }}{% else %}0{% endif %};
         
         const cons1 = Math.max(0, p1_actual - p1_anterior);
         const cons2 = Math.max(0, p2_actual - p2_anterior);
@@ -307,11 +254,8 @@
         document.getElementById('p_pct2').textContent = pct2;
         document.getElementById('p_pago1').textContent = pago1.toLocaleString('es-CL');
         document.getElementById('p_pago2').textContent = pago2.toLocaleString('es-CL');
-        
         document.getElementById('previewBox').style.display = 'block';
     });
 </script>
-
 </body>
 </html>
-
