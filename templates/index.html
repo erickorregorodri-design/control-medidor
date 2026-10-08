@@ -200,13 +200,15 @@
             </div>
 
             <div class="btn-group">
-                <button type="button" class="btn-calc" onclick="calcularConsumos()">Calcular Consumos</button>
-                {% if role == 'admin' %}
-                <button type="submit" class="btn-save">Guardar Registro</button>
-                {% else %}
-                <button type="button" class="btn-save" style="background-color: var(--border); color: var(--text-label);" disabled>👀 Modo Solo Lectura</button>
-                {% endif %}
-            </div>
+            {% if role == 'admin' %}
+            <button type="button" class="btn-calc" onclick="calcularConsumos()">Calcular Consumos</button>
+            <button type="submit" class="btn-save">Guardar Registro</button>
+            {% else %}
+            <button type="button" class="btn-calc" style="background-color: var(--border); color: var(--text-label); cursor: not-allowed;" disabled>👀 Modo Lectura Activo</button>
+            <button type="button" class="btn-save" style="background-color: var(--border); color: var(--text-label);" disabled>👀 Modo Solo Lectura</button>
+            {% endif %}
+        </div>
+
         </form>
 
         <hr>
