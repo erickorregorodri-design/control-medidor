@@ -183,6 +183,7 @@ def eliminar(id):
     return render_template('index.html', historial=historial, ultimo=ultimo_registro, error_validacion=None, role=role, fecha_hoy=fecha_hoy)
 
 
+
 # Asegurar la creación de tablas dentro del contexto seguro
 with app.app_context():
     db.create_all()
