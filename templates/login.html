@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🔒 Acceso Privado</title>
     <style>
-                /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
+        /* ☀️ CONFIGURACIÓN POR DEFECTO (MODO CLARO) */
         :root {
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
@@ -82,6 +82,13 @@
             margin-bottom: 20px; 
             text-align: left; 
         }
+
+        /* 🟢 NUEVO: Contenedor relativo para posicionar el botón dentro del input */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
         
         label { 
             display: block; 
@@ -102,6 +109,11 @@
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
+
+        /* 🟢 NUEVO: Margen derecho al input para que el texto largo no choque con el ojo */
+        .password-wrapper input {
+            padding-right: 46px;
+        }
         
         input::placeholder {
             color: #94a3b8;
@@ -111,8 +123,32 @@
             outline: none;
             border-color: var(--btn-hover); 
         }
+
+        /* 🟢 NUEVO: Estilos estéticos del botón del ojo */
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            margin: 0;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .toggle-password-btn:hover {
+            background: none;
+            opacity: 1;
+        }
         
-        button {
+        button[type="submit"] {
             width: 100%;
             padding: 14px;
             background-color: var(--btn-color);
@@ -126,7 +162,7 @@
             transition: background-color 0.2s;
         }
         
-        button:hover { 
+        button[type="submit"]:hover { 
             background-color: var(--btn-hover); 
         }
         
@@ -140,7 +176,8 @@
             border-radius: 6px; 
             text-align: center;
         }
-                /* ==========================================================================
+
+        /* ==========================================================================
            CENTRADO ABSOLUTO PARA COMPUTADOR (ESCRITORIO)
            ========================================================================== */
         @media (min-width: 769px) {
@@ -155,15 +192,14 @@
                 margin: auto !important;
             }
         }
-
     </style>
 </head>
 <body>
     <div class="login-card">
         <div style="margin-bottom: 28px;">
-    <h2 style="margin-bottom: 4px; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 8px;">⚡ Control de Medidor</h2>
-    <span style="color: var(--text-label); font-size: 14px; font-weight: 500; display: block;">🔒 Acceso Privado</span>
-</div>
+            <h2 style="margin-bottom: 4px; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 8px;">⚡ Control de Medidor</h2>
+            <span style="color: var(--text-label); font-size: 14px; font-weight: 500; display: block;">🔒 Acceso Privado</span>
+        </div>
         
         {% if error %}
             <div class="error">{{ error }}</div>
@@ -176,10 +212,29 @@
             </div>
             <div class="form-group">
                 <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
+                <!-- 🟢 MODIFICADO: Añadido el contenedor y el botón del ojo -->
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="Mostrar contraseña">👁️</button>
+                </div>
             </div>
             <button type="submit">Ingresar al Sistema</button>
         </form>
     </div>
+
+    <!-- 🟢 NUEVO: JavaScript para manejar el cambio visual de la clave -->
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const passwordInput = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+            // Revisa el estado actual y lo cambia al contrario
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            // Cambia el emoji visual del botón
+            this.textContent = isPassword ? '🙈' : '👁️';
+        });
+    </script>
 </body>
 </html>
