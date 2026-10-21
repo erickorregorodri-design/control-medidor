@@ -218,32 +218,45 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Lecturas (Erick/Esteban)</th>
-                        <th>Consumo Neto</th>
-                        <th>Porcentaje</th>
-                        <th>A Pagar</th>
-                        <th>Acción</th>
+                        <th style="text-align: center;">Fecha</th>
+                        <th style="text-align: center;">Monto Total</th> <!-- NUEVA CABECERA -->
+                        <th style="text-align: center;">Lecturas (Erick/Esteban)</th>
+                        <th style="text-align: center;">Consumo Neto</th>
+                        <th style="text-align: center;">Porcentaje</th>
+                        <th style="text-align: center;">A Pagar</th>
+                        <th style="text-align: center;">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for reg in historial %}
                     <tr>
-                        <td>{{ reg.fecha.strftime('%d/%m/%Y') }}</td>
-                        <td>{{ reg.lectura_p1|int }} / {{ reg.lectura_p2|int }}</td>
-                        <td>
+                        <!-- 1.- FECHA -->
+                        <td style="text-align: center;">{{ reg.fecha.strftime('%d/%m/%Y') }}</td>
+                        <!-- 2.- MONTO TOTAL -->
+                        <td style="text-align: center; font-weight: bold; color: var(--text-color);">
+                            ${{ "{:,.0f}".format(reg.monto_boleta).replace(',', '.') if reg.monto_boleta else '0' }}
+                        </td>
+                        <!-- 3.- LECTURAS -->    
+                         <td style="text-align: center;">
+                            {{ reg.lectura_p1 | int }} / {{ reg.lectura_p2 | int }}
+                        </td>
+                        <!-- 4.- CONSUMOS NETOS -->   
+                        <td style="text-align: center;">
                             <span class="badge">{{ reg.consumo_p1 }} kWh</span><br>
                             <span class="badge" style="background-color: rgba(22, 163, 74, 0.1); color: var(--success);">{{ reg.consumo_p2 }} kWh</span>
                         </td>
-                        <td>
+                        <!-- 5.- PORCENTAJES -->    
+                        <td style="text-align: center;">
                             <strong>Erick:</strong> {{ reg.porcentaje_p1 }}%<br>
                             <strong>Esteban:</strong> {{ reg.porcentaje_p2 }}%
                         </td>
-                        <td>
-                            <strong>Erick:</strong> ${{ "{:,.0f}".format(reg.pago_p1).replace(',', '.') if reg.pago_p1 else '0' }}<br>
-                            <strong>Esteban:</strong> ${{ "{:,.0f}".format(reg.pago_p2).replace(',', '.') if reg.pago_p2 else '0' }}
-                        </td>
-                        <td>
+                        <!-- 6.- A PAGAR -->
+                        <td style="text-align: center;">
+                        <strong>Erick:</strong> ${{ "{:,.0f}".format(reg.pago_p1).replace(',', '.') if reg.pago_p1 else '0' }}<br>
+                        <strong>Esteban:</strong> ${{ "{:,.0f}".format(reg.pago_p2).replace(',', '.') if reg.pago_p2 else '0' }}
+                        </td>    
+                        <!-- 7.- ACCIÓN (Aquí va el botón eliminar sin etiquetas td duplicadas) -->
+                        <td style="text-align: center;">
                             {% if role == 'admin' %}
                             <form action="/eliminar/{{ reg.id }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
                                 <button type="submit" class="btn-delete">Eliminar</button>
@@ -255,7 +268,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align: center; color: var(--text-label); padding: 16px;">No hay registros guardados todavía.</td>
+                        <td colspan="7" style="text-align: center; color: var(--text-label); padding: 16px;">No hay registros guardados todavía.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
